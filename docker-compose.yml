@@ -10,8 +10,8 @@ services:
     volumes:
       - ./client/src:/app/src
     environment:
-      - VITE_API_URL=http://localhost:8000/api/v1
-      - VITE_WS_URL=ws://localhost:8000
+      - VITE_PROXY_TARGET=http://api:8000
+      - VITE_WS_PROXY_TARGET=ws://api:8000
     depends_on:
       - api
 

@@ -1,0 +1,97 @@
+import { apiClient } from '@/shared/lib/api'
+import type { PaginatedResponse } from '@/shared/types/api'
+import type { Activity, Comment, Issue } from '@/shared/types/models'
+
+export interface IssueFilters {
+  status?: string
+  priority?: string
+  assignee_id?: string
+  label?: string
+  search?: string
+  ordering?: string
+}
+
+export interface CreateIssueData {
+  title: string
+  description?: string
+  status?: string
+  priority?: string
+  assignee_id?: string
+  label_ids?: string[]
+  due_date?: string
+  estimate?: number
+}
+
+export interface UpdateIssueData extends Partial<CreateIssueData> {}
+
+export interface MoveIssueData {
+  status: string
+  position: string
+}
+
+export const issueApi = {
+  list: async (projectKey: string, filters: IssueFilters = {}): Promise<Issue[]> => {
+    const params = Object.fromEntries(
+      Object.entries(filters).filter(([, v]) => v !== undefined && v !== ''),
+    )
+    const res = await apiClient.get<PaginatedResponse<Issue>>(
+      `/projects/${projectKey}/issues/`,
+      { params },
+    )
+    return res.data.results
+  },
+
+  get: async (projectKey: string, identifier: string): Promise<Issue> => {
+    const res = await apiClient.get<Issue>(`/projects/${projectKey}/issues/${identifier}/`)
+    return res.data
+  },
+
+  create: async (projectKey: string, data: CreateIssueData): Promise<Issue> => {
+    const res = await apiClient.post<Issue>(`/projects/${projectKey}/issues/`, data)
+    return res.data
+  },
+
+  update: async (projectKey: string, identifier: string, data: UpdateIssueData): Promise<Issue> => {
+    const res = await apiClient.patch<Issue>(`/projects/${projectKey}/issues/${identifier}/`, data)
+    return res.data
+  },
+
+  delete: async (projectKey: string, identifier: string): Promise<void> => {
+    await apiClient.delete(`/projects/${projectKey}/issues/${identifier}/`)
+  },
+
+  move: async (projectKey: string, identifier: string, data: MoveIssueData): Promise<Issue> => {
+    const res = await apiClient.post<Issue>(
+      `/projects/${projectKey}/issues/${identifier}/move/`,
+      data,
+    )
+    return res.data
+  },
+
+  listComments: async (projectKey: string, identifier: string): Promise<Comment[]> => {
+    const res = await apiClient.get<Comment[]>(
+      `/projects/${projectKey}/issues/${identifier}/comments/`,
+    )
+    return res.data
+  },
+
+  addComment: async (projectKey: string, identifier: string, body: string): Promise<Comment> => {
+    const res = await apiClient.post<Comment>(
+      `/projects/${projectKey}/issues/${identifier}/comments/`,
+      { body },
+    )
+    return res.data
+  },
+
+  listActivity: async (projectKey: string, identifier: string): Promise<Activity[]> => {
+    const res = await apiClient.get<Activity[]>(
+      `/projects/${projectKey}/issues/${identifier}/activity/`,
+    )
+    return res.data
+  },
+
+  search: async (q: string): Promise<Issue[]> => {
+    const res = await apiClient.get<PaginatedResponse<Issue>>('/search/', { params: { q } })
+    return res.data.results
+  },
+}

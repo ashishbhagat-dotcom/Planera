@@ -71,7 +71,8 @@ class RefreshView(APIView):
 
 
 class LogoutView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
 
     def post(self, request):
         raw = request.COOKIES.get(REFRESH_COOKIE_NAME)

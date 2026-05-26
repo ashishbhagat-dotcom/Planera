@@ -1,0 +1,31 @@
+/* Status color tokens */
+:root {
+  --status-backlog: #6b7280;
+  --status-backlog-bg: #f3f4f6;
+  --status-todo: #e5e7eb;
+  --status-todo-bg: #f9fafb;
+  --status-in-progress: #f59e0b;
+  --status-in-progress-bg: #fffbeb;
+  --status-in-review: #3b82f6;
+  --status-in-review-bg: #eff6ff;
+  --status-done: #10b981;
+  --status-done-bg: #ecfdf5;
+  --status-cancelled: #ef4444;
+  --status-cancelled-bg: #fef2f2;
+
+  /* Priority color tokens */
+  --priority-urgent: #ef4444;
+  --priority-high: #f97316;
+  --priority-medium: #eab308;
+  --priority-low: #3b82f6;
+  --priority-none: #9ca3af;
+}
+
+.dark {
+  --status-backlog-bg: #1f2937;
+  --status-todo-bg: #1f2937;
+  --status-in-progress-bg: #1c1a10;
+  --status-in-review-bg: #0f172a;
+  --status-done-bg: #052e16;
+  --status-cancelled-bg: #1c0a0a;
+}
