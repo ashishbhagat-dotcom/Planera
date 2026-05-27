@@ -10,6 +10,7 @@ import {
   LogOut,
   Moon,
   Sun,
+  ChevronUp,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { useUiStore } from '@/shared/stores/uiStore'
@@ -17,6 +18,8 @@ import { WorkspaceSwitcher } from '@/modules/workspace/components/WorkspaceSwitc
 import { useWorkspaces } from '@/modules/workspace/hooks/useWorkspace'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { useNotifications } from '@/modules/notifications/hooks/useNotifications'
+import { Avatar } from '@/shared/components/ui/Avatar'
+import { DropdownMenu } from '@/shared/components/ui/DropdownMenu'
 
 interface NavItem {
   label: string
@@ -133,11 +136,6 @@ export function Sidebar() {
           </span>
           Notifications
         </button>
-        <SidebarNavLink
-          to="/app/settings"
-          icon={<Settings size={16} />}
-          label="Settings"
-        />
         <button
           onClick={toggleDarkMode}
           className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
@@ -146,14 +144,59 @@ export function Sidebar() {
           {darkMode ? <Sun size={16} className="shrink-0" /> : <Moon size={16} className="shrink-0" />}
           {darkMode ? 'Light mode' : 'Dark mode'}
         </button>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)] hover:text-red-400"
-          title={user?.email}
-        >
-          <LogOut size={16} className="shrink-0" />
-          Log out
-        </button>
+
+        {/* User profile card */}
+        <div className="mt-1 border-t border-[var(--border)] pt-2">
+          <DropdownMenu>
+            <DropdownMenu.Trigger className="w-full">
+              <div className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors hover:bg-[var(--surface-hover)]">
+                <Avatar
+                  src={user?.avatar_url}
+                  name={user?.full_name || user?.email}
+                  size="sm"
+                  className="shrink-0 !h-6 !w-6"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-medium text-[var(--text-primary)]">
+                    {user?.full_name || 'My Account'}
+                  </p>
+                  <p className="truncate text-[10px] text-[var(--text-muted)]">
+                    {user?.email}
+                  </p>
+                </div>
+                <ChevronUp size={13} className="shrink-0 text-[var(--text-muted)]" />
+              </div>
+            </DropdownMenu.Trigger>
+
+            <DropdownMenu.Content align="left" className="bottom-full mb-1 w-56 !mt-0">
+              {/* User info header */}
+              <div className="flex items-center gap-2.5 px-3 py-2.5">
+                <Avatar
+                  src={user?.avatar_url}
+                  name={user?.full_name || user?.email}
+                  size="md"
+                  className="shrink-0"
+                />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-[var(--text-primary)]">
+                    {user?.full_name || 'My Account'}
+                  </p>
+                  <p className="truncate text-xs text-[var(--text-muted)]">{user?.email}</p>
+                </div>
+              </div>
+              <DropdownMenu.Separator />
+              <DropdownMenu.Item onClick={() => navigate('/app/settings')}>
+                <Settings size={14} />
+                Profile &amp; Settings
+              </DropdownMenu.Item>
+              <DropdownMenu.Separator />
+              <DropdownMenu.Item destructive onClick={handleLogout}>
+                <LogOut size={14} />
+                Log out
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu>
+        </div>
       </div>
     </aside>
   )
