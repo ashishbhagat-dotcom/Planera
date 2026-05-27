@@ -36,14 +36,8 @@ function CardContent({ issue, projectKey, onDelete }: {
         </div>
 
         <DropdownMenu>
-          <DropdownMenu.Trigger className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              className="rounded p-0.5 hover:bg-[var(--surface-hover)]"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <MoreVertical size={13} className="text-[var(--text-muted)]" />
-            </button>
+          <DropdownMenu.Trigger className="cursor-pointer rounded p-0.5 opacity-0 transition-opacity hover:bg-[var(--surface-hover)] group-hover:opacity-100">
+            <MoreVertical size={13} className="text-[var(--text-muted)]" />
           </DropdownMenu.Trigger>
           <DropdownMenu.Content align="right">
             <DropdownMenu.Item destructive onClick={onDelete}>

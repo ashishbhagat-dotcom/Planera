@@ -33,8 +33,9 @@ export function useMoveIssue(projectKey: string) {
       toast.error('Failed to move issue')
     },
 
-    onSettled: () => {
+    onSettled: (_data, _err, vars) => {
       qc.invalidateQueries({ queryKey: ['issues', projectKey] })
+      qc.invalidateQueries({ queryKey: queryKeys.issues.activity(vars.identifier) })
     },
   })
 }
@@ -90,6 +91,7 @@ export function useUpdateIssue(projectKey: string, identifier: string) {
     onSuccess: (updated) => {
       qc.setQueryData(queryKeys.issues.detail(identifier), updated)
       qc.invalidateQueries({ queryKey: ['issues', projectKey] })
+      qc.invalidateQueries({ queryKey: queryKeys.issues.activity(identifier) })
     },
   })
 }

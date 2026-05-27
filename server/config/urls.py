@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from issues.views import SearchView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,4 +24,6 @@ urlpatterns = [
     path('api/v1/workspaces/', include('organizations.urls')),
     path('api/v1/projects/', include('projects.urls')),
     path('api/v1/', include('issues.urls')),
+    path('api/v1/search/', SearchView.as_view(), name='search'),
+    path('api/v1/notifications/', include('notifications.urls')),
 ]

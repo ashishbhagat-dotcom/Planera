@@ -83,6 +83,15 @@ export const issueApi = {
     return res.data
   },
 
+  updateComment: async (_projectKey: string, _identifier: string, commentId: string, body: string): Promise<Comment> => {
+    const res = await apiClient.patch<Comment>(`/comments/${commentId}/`, { body })
+    return res.data
+  },
+
+  deleteComment: async (_projectKey: string, _identifier: string, commentId: string): Promise<void> => {
+    await apiClient.delete(`/comments/${commentId}/`)
+  },
+
   listActivity: async (projectKey: string, identifier: string): Promise<Activity[]> => {
     const res = await apiClient.get<Activity[]>(
       `/projects/${projectKey}/issues/${identifier}/activity/`,

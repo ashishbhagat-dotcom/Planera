@@ -14,6 +14,7 @@ import { STATUS_ORDER } from '@/shared/lib/constants'
 import { useBoardIssues } from '../hooks/useBoardIssues'
 import { useBoardDnD } from '../hooks/useBoardDnD'
 import { useBoardFilters } from '../hooks/useBoardFilters'
+import { useBoardSocket } from '../hooks/useBoardSocket'
 import { BoardColumn } from './BoardColumn'
 import { BoardCard, BoardCardOverlay } from './BoardCard'
 import { BoardHeader } from './BoardHeader'
@@ -23,6 +24,7 @@ export function BoardView() {
   const { key: projectKey = '' } = useParams<{ key: string }>()
   const { apiFilters } = useBoardFilters()
   const qc = useQueryClient()
+  useBoardSocket(projectKey)
 
   // Purge any cache entries that were corrupted by old mutation code writing BoardData
   // instead of Issue[]. Without this, the select function receives an object and throws.

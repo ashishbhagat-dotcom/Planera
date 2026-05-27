@@ -1,13 +1,17 @@
 import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { BreadcrumbNav } from './BreadcrumbNav'
+import { CommandPalette } from './CommandPalette'
 import { IssueDetailPanel } from '@/modules/issue/components/IssueDetailPanel'
+import { NotificationPanel } from '@/modules/notifications/components/NotificationPanel'
 import { useUiStore } from '@/shared/stores/uiStore'
+import { useKeyboardShortcut } from '@/shared/hooks/useKeyboardShortcut'
 import { cn } from '@/shared/lib/utils'
 import { PanelLeft } from 'lucide-react'
 
 export function AppShell() {
-  const { sidebarOpen, setSidebarOpen } = useUiStore()
+  const { sidebarOpen, setSidebarOpen, toggleCommandPalette } = useUiStore()
+  useKeyboardShortcut('k', toggleCommandPalette, { meta: true })
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--background)]">
@@ -40,6 +44,8 @@ export function AppShell() {
       </div>
 
       <IssueDetailPanel />
+      <CommandPalette />
+      <NotificationPanel />
     </div>
   )
 }

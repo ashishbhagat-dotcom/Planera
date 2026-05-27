@@ -13,6 +13,8 @@ interface UiState {
   setCommandPaletteOpen: (open: boolean) => void
   toggleCommandPalette: () => void
   setBoardViewMode: (mode: BoardViewMode) => void
+  notificationPanelOpen: boolean
+  toggleNotificationPanel: () => void
 }
 
 export const useUiStore = create<UiState>((set) => ({
@@ -20,10 +22,12 @@ export const useUiStore = create<UiState>((set) => ({
   activeIssueId: null,
   commandPaletteOpen: false,
   boardViewMode: 'kanban',
+  notificationPanelOpen: false,
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
   setActiveIssueId: (id) => set({ activeIssueId: id }),
   setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
   toggleCommandPalette: () => set((s) => ({ commandPaletteOpen: !s.commandPaletteOpen })),
   setBoardViewMode: (mode) => set({ boardViewMode: mode }),
+  toggleNotificationPanel: () => set((s) => ({ notificationPanelOpen: !s.notificationPanelOpen })),
 }))

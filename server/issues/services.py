@@ -6,6 +6,8 @@ from django.db.models import F
 from core.fractional_index import generate_end_position
 from projects.models import Project
 from .models import Activity, Issue
+from .tasks import broadcast_board_update
+from notifications.tasks import create_and_push_notification
 
 
 class IssueService:
@@ -60,13 +62,21 @@ class IssueService:
         )
         Project.objects.filter(pk=project.pk).update(issue_count=F('issue_count') + 1)
 
-        transaction.on_commit(lambda: IssueService._broadcast_stub('issue.created', issue))
+        _project_key = project.key
+        _issue_id = str(issue.id)
+        _identifier = issue.identifier
+        _actor_id = str(creator.id)
+        transaction.on_commit(lambda: broadcast_board_update(
+            _project_key, 'issue.created',
+            {'issue_id': _issue_id, 'identifier': _identifier, 'actor_id': _actor_id},
+        ))
         return issue
 
     @staticmethod
     @transaction.atomic
     def update_issue(*, issue: Issue, actor, **data) -> Issue:
         changed = {}
+        old_assignee_id = issue.assignee_id
         for field, value in data.items():
             old = getattr(issue, field, None)
             if old != value:
@@ -83,6 +93,55 @@ class IssueService:
                 verb=Activity.UPDATED,
                 data=changed,
             )
+
+        new_assignee_id = issue.assignee_id
+        if 'assignee_id' in changed:
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            _org_id = str(issue.project.organization_id)
+            _issue_id = str(issue.id)
+            _identifier = issue.identifier
+            _actor_email = actor.email
+
+            if new_assignee_id and new_assignee_id != old_assignee_id:
+                try:
+                    new_assignee = User.objects.get(pk=new_assignee_id)
+                    if new_assignee != actor:
+                        _recipient_id = str(new_assignee_id)
+                        transaction.on_commit(lambda: create_and_push_notification.delay(
+                            _recipient_id,
+                            _org_id,
+                            'issue.assigned',
+                            f'You were assigned {_identifier}',
+                            {'issue_id': _issue_id, 'identifier': _identifier, 'actor': _actor_email},
+                        ))
+                except User.DoesNotExist:
+                    pass
+
+            if old_assignee_id and old_assignee_id != new_assignee_id:
+                try:
+                    old_assignee = User.objects.get(pk=old_assignee_id)
+                    if old_assignee != actor:
+                        _recipient_id = str(old_assignee_id)
+                        transaction.on_commit(lambda: create_and_push_notification.delay(
+                            _recipient_id,
+                            _org_id,
+                            'issue.unassigned',
+                            f'You were unassigned from {_identifier}',
+                            {'issue_id': _issue_id, 'identifier': _identifier, 'actor': _actor_email},
+                        ))
+                except User.DoesNotExist:
+                    pass
+
+        if changed:
+            _project_key = issue.project.key
+            _identifier = issue.identifier
+            _actor_id = str(actor.id)
+            transaction.on_commit(lambda: broadcast_board_update(
+                _project_key, 'issue.updated',
+                {'identifier': _identifier, 'actor_id': _actor_id, 'changed': list(changed.keys())},
+            ))
+
         return issue
 
     @staticmethod
@@ -101,9 +160,20 @@ class IssueService:
             data={'from': old_status, 'to': new_status},
         )
 
-        transaction.on_commit(
-            lambda: IssueService._broadcast_stub('issue.moved', issue)
-        )
+        _project_key = issue.project.key
+        _issue_id = str(issue.id)
+        _identifier = issue.identifier
+        _actor_id = str(actor.id)
+        transaction.on_commit(lambda: broadcast_board_update(
+            _project_key, 'issue.moved',
+            {
+                'issue_id': _issue_id,
+                'identifier': _identifier,
+                'status': new_status,
+                'position': new_position,
+                'actor_id': _actor_id,
+            },
+        ))
         return issue
 
     @staticmethod
@@ -124,29 +194,31 @@ class IssueService:
             },
         )
 
-        # Notification task wired in T40
         if assignee and assignee != actor:
-            transaction.on_commit(
-                lambda: IssueService._notify_stub(assignee, issue, actor)
-            )
+            _recipient_id = str(assignee.id)
+            _org_id = str(issue.project.organization_id)
+            _issue_id = str(issue.id)
+            _identifier = issue.identifier
+            _actor_email = actor.email
+            transaction.on_commit(lambda: create_and_push_notification.delay(
+                _recipient_id,
+                _org_id,
+                'issue.assigned',
+                f'You were assigned {_identifier}',
+                {'issue_id': _issue_id, 'identifier': _identifier, 'actor': _actor_email},
+            ))
         return issue
 
     @staticmethod
     @transaction.atomic
     def delete_issue(*, issue: Issue, actor) -> None:
-        project = issue.project
+        _project_key = issue.project.key
+        _issue_id = str(issue.id)
+        _identifier = issue.identifier
+        _actor_id = str(actor.id)
         issue.delete()
         # issue_count decremented via post_delete signal in signals.py
-        transaction.on_commit(
-            lambda: IssueService._broadcast_stub('issue.deleted', None, extra={'project_id': str(project.id)})
-        )
-
-    @staticmethod
-    def _broadcast_stub(event_type: str, issue, extra: dict = None):
-        """Replaced by real Celery task in T35."""
-        pass
-
-    @staticmethod
-    def _notify_stub(assignee, issue, actor):
-        """Replaced by real Celery notification task in T40."""
-        pass
+        transaction.on_commit(lambda: broadcast_board_update(
+            _project_key, 'issue.deleted',
+            {'issue_id': _issue_id, 'identifier': _identifier, 'actor_id': _actor_id},
+        ))

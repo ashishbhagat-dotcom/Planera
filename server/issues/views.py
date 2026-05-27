@@ -1,7 +1,9 @@
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import mixins
 
@@ -189,3 +191,29 @@ class LabelViewSet(
 
     def perform_create(self, serializer):
         serializer.save(organization=self.request.organization)
+
+
+class SearchView(APIView):
+    permission_classes = (IsAuthenticated, OrgScopedPermission, IsOrgMember)
+
+    def get(self, request):
+        q = request.query_params.get('q', '').strip()
+        if not q or len(q) < 2:
+            return Response({'results': [], 'count': 0})
+
+        org = request.organization
+        query = SearchQuery(q, search_type='websearch')
+        vector = SearchVector('title', 'description', config='english')
+
+        issues = (
+            Issue.objects
+            .filter(project__organization=org)
+            .select_related('assignee', 'creator', 'project')
+            .prefetch_related('labels')
+            .annotate(rank=SearchRank(vector, query))
+            .filter(rank__gt=0)
+            .order_by('-rank')[:20]
+        )
+
+        data = IssueListSerializer(issues, many=True).data
+        return Response({'results': data, 'count': len(data)})

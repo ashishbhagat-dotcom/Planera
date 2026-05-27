@@ -39,7 +39,11 @@ function DropdownMenu({ children }: { children: ReactNode }) {
 function Trigger({ children, className }: { children: ReactNode; className?: string }) {
   const { open, setOpen } = useContext(DropdownContext)
   return (
-    <div className={className} onClick={() => setOpen(!open)}>
+    <div
+      className={className}
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={(e) => { e.stopPropagation(); setOpen(!open) }}
+    >
       {children}
     </div>
   )
@@ -86,7 +90,7 @@ function Item({
         disabled && 'pointer-events-none opacity-40',
         className
       )}
-      onClick={() => { onClick?.(); setOpen(false) }}
+      onClick={(e) => { e.stopPropagation(); onClick?.(); setOpen(false) }}
       disabled={disabled}
     >
       {children}

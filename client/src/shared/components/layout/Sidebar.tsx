@@ -14,6 +14,7 @@ import { useUiStore } from '@/shared/stores/uiStore'
 import { WorkspaceSwitcher } from '@/modules/workspace/components/WorkspaceSwitcher'
 import { useWorkspaces } from '@/modules/workspace/hooks/useWorkspace'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
+import { useNotifications } from '@/modules/notifications/hooks/useNotifications'
 
 interface NavItem {
   label: string
@@ -45,9 +46,12 @@ function SidebarNavLink({ to, icon, label, end }: NavItem) {
 export function Sidebar() {
   const { key } = useParams<{ key?: string }>()
   const toggleSidebar = useUiStore((s) => s.toggleSidebar)
+  const toggleNotificationPanel = useUiStore((s) => s.toggleNotificationPanel)
   const { logout, user } = useAuth()
   const navigate = useNavigate()
   useWorkspaces() // hydrates workspaceStore on mount
+  const { data: notifData } = useNotifications()
+  const unreadCount = notifData?.unread_count ?? 0
 
   async function handleLogout() {
     await logout()
@@ -112,11 +116,20 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="flex flex-col gap-0.5 border-t border-[var(--border)] p-2">
-        <SidebarNavLink
-          to="/app/notifications"
-          icon={<Bell size={16} />}
-          label="Notifications"
-        />
+        <button
+          onClick={toggleNotificationPanel}
+          className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+        >
+          <span className="relative size-4 shrink-0">
+            <Bell size={16} />
+            {unreadCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-blue-500 text-[9px] font-bold text-white animate-pulse">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </span>
+          Notifications
+        </button>
         <SidebarNavLink
           to="/app/settings"
           icon={<Settings size={16} />}

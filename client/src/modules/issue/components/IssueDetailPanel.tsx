@@ -1,11 +1,15 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { X, MessageSquare, Activity } from 'lucide-react'
+import { X, MessageSquare, Activity, Trash2 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { useUiStore } from '@/shared/stores/uiStore'
 import { useKeyboardShortcut } from '@/shared/hooks/useKeyboardShortcut'
 import { useIssue } from '../hooks/useIssues'
+import { useDeleteIssue } from '../hooks/useIssueMutations'
 import { IssueProperties } from './IssueProperties'
+import { IssueComments } from './IssueComments'
+import { IssueActivity } from './IssueActivity'
+import { IssueDescription } from './IssueDescription'
 import type { Issue } from '@/shared/types/models'
 
 function PanelSkeleton() {
@@ -37,16 +41,7 @@ function PanelBody({ issue, projectKey }: { issue: Issue; projectKey: string }) 
           {issue.title}
         </h2>
 
-        <div className="mt-6">
-          <p className="mb-2 text-xs font-medium text-[var(--text-muted)]">Description</p>
-          {issue.description ? (
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-[var(--text-primary)]">
-              {issue.description}
-            </p>
-          ) : (
-            <p className="text-sm italic text-[var(--text-muted)]">No description</p>
-          )}
-        </div>
+        <IssueDescription issue={issue} projectKey={projectKey} />
 
         {/* Tabs */}
         <div className="mt-8">
@@ -67,8 +62,12 @@ function PanelBody({ issue, projectKey }: { issue: Issue; projectKey: string }) 
               </button>
             ))}
           </div>
-          <div className="py-6 text-center text-sm text-[var(--text-muted)]">
-            {tab === 'comments' ? 'No comments yet.' : 'No activity yet.'}
+          <div className="py-4">
+            {tab === 'comments' ? (
+              <IssueComments projectKey={projectKey} identifier={issue.identifier} />
+            ) : (
+              <IssueActivity projectKey={projectKey} identifier={issue.identifier} />
+            )}
           </div>
         </div>
       </div>
@@ -107,8 +106,16 @@ export function IssueDetailPanel() {
   const projectKey = activeIssueId?.replace(/-\d+$/, '') ?? ''
   const { data: issue, isLoading } = useIssue(projectKey, activeIssueId ?? '')
 
-  const close = () => setActiveIssueId(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const { mutate: deleteIssue, isPending: isDeleting } = useDeleteIssue(projectKey)
+
+  const close = () => { setConfirmDelete(false); setActiveIssueId(null) }
   useKeyboardShortcut('Escape', close, { enabled: isOpen })
+
+  function handleDelete() {
+    if (!activeIssueId) return
+    deleteIssue(activeIssueId, { onSuccess: close })
+  }
 
   return (
     <>
@@ -135,13 +142,41 @@ export function IssueDetailPanel() {
           <span className="font-mono text-xs text-[var(--text-muted)]">
             {activeIssueId ?? ''}
           </span>
-          <button
-            onClick={close}
-            className="rounded p-1 text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-            aria-label="Close panel"
-          >
-            <X size={16} />
-          </button>
+          <div className="flex items-center gap-1">
+            {confirmDelete ? (
+              <>
+                <span className="mr-1 text-xs text-[var(--text-muted)]">Delete?</span>
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="rounded px-2 py-1 text-xs font-medium text-red-500 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+                >
+                  {isDeleting ? 'Deleting…' : 'Confirm'}
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="rounded px-2 py-1 text-xs text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)]"
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="rounded p-1 text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)] hover:text-red-500"
+                aria-label="Delete issue"
+              >
+                <Trash2 size={15} />
+              </button>
+            )}
+            <button
+              onClick={close}
+              className="rounded p-1 text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+              aria-label="Close panel"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Body */}

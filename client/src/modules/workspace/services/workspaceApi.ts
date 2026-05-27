@@ -24,8 +24,8 @@ export const workspaceApi = {
   },
 
   getMembers: async (slug: string): Promise<Membership[]> => {
-    const res = await apiClient.get<PaginatedResponse<Membership>>(`/workspaces/${slug}/members/`)
-    return res.data.results
+    const res = await apiClient.get<Membership[]>(`/workspaces/${slug}/members/`)
+    return res.data
   },
 
   inviteMember: async (slug: string, data: { email: string; role: string }): Promise<Membership> => {
