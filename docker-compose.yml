@@ -26,6 +26,13 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - DJANGO_SETTINGS_MODULE=config.settings.development
       - SECRET_KEY=dev-secret-key-change-in-prod
+      - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+      - EMAIL_HOST=smtp.resend.com
+      - EMAIL_PORT=465
+      - EMAIL_USE_SSL=True
+      - EMAIL_HOST_USER=resend
+      - EMAIL_HOST_PASSWORD=${RESEND_API_KEY}
+      - DEFAULT_FROM_EMAIL=${RESEND_FROM_EMAIL:-onboarding@resend.dev}
     depends_on:
       db:
         condition: service_healthy

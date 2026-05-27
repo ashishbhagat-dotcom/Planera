@@ -1,6 +1,8 @@
 import uuid
+import random
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
@@ -39,3 +41,33 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+class OTPRegistration(models.Model):
+    email = models.EmailField()
+    full_name = models.CharField(max_length=150, blank=True)
+    hashed_password = models.CharField(max_length=128)
+    otp_code = models.CharField(max_length=6)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'users_otp_registration'
+        indexes = [models.Index(fields=['email', 'is_used'])]
+
+    @classmethod
+    def create_for_email(cls, email, full_name, hashed_password):
+        cls.objects.filter(email=email, is_used=False).delete()
+        code = f'{random.randint(0, 999999):06d}'
+        expires_at = timezone.now() + timezone.timedelta(minutes=10)
+        return cls.objects.create(
+            email=email,
+            full_name=full_name,
+            hashed_password=hashed_password,
+            otp_code=code,
+            expires_at=expires_at,
+        )
+
+    def is_valid(self):
+        return not self.is_used and timezone.now() < self.expires_at

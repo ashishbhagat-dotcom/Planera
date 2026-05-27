@@ -15,6 +15,22 @@ export async function register(payload: {
   return res.data
 }
 
+export async function sendOtp(payload: {
+  email: string
+  full_name: string
+  password: string
+}): Promise<void> {
+  await apiClient.post('/auth/send-otp/', payload)
+}
+
+export async function verifyOtp(payload: {
+  email: string
+  otp_code: string
+}): Promise<AuthResponse> {
+  const res = await apiClient.post<AuthResponse>('/auth/verify-otp/', payload)
+  return res.data
+}
+
 export async function login(payload: {
   email: string
   password: string
