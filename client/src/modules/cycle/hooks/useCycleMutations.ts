@@ -30,8 +30,10 @@ export function useSetIssueCycle(projectKey: string) {
   return useMutation({
     mutationFn: ({ identifier, cycleId }: { identifier: string; cycleId: string | null }) =>
       setIssueCycle(projectKey, identifier, cycleId),
-    onSuccess: (_data, { cycleId }) => {
+    onSuccess: (_data, { identifier, cycleId }) => {
       qc.invalidateQueries({ queryKey: queryKeys.issues.all(projectKey) })
+      // Refresh the open detail panel so the Cycle property updates immediately
+      qc.invalidateQueries({ queryKey: queryKeys.issues.detail(identifier) })
       qc.invalidateQueries({ queryKey: queryKeys.cycles.active(projectKey) })
       if (cycleId) qc.invalidateQueries({ queryKey: queryKeys.cycles.detail(cycleId) })
     },

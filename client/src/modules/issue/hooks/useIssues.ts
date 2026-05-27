@@ -31,8 +31,12 @@ export function useCreateIssue(projectKey: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (data: CreateIssueData) => issueApi.create(projectKey, data),
-    onSuccess: () => {
+    onSuccess: (newIssue) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.issues.all(projectKey) })
+      // If this is a sub-issue, the parent's detail cache (sub_issues array) must refresh
+      if (newIssue.parent_id) {
+        queryClient.invalidateQueries({ queryKey: ['issues', 'detail'] })
+      }
     },
   })
 }
