@@ -71,8 +71,11 @@ function CardContent({ issue, projectKey: _projectKey, onDelete }: {
         </div>
       )}
 
-      {/* Bottom row: assignee */}
-      <div className="flex items-center justify-end">
+      {/* Bottom row: assignee + sub-issue count */}
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-mono text-[var(--text-muted)]">
+          {(issue.sub_issue_count ?? 0) > 0 && `▸ ${issue.completed_sub_issue_count ?? 0}/${issue.sub_issue_count}`}
+        </span>
         {issue.assignee ? (
           <Avatar
             src={issue.assignee.avatar_url}
@@ -83,6 +86,18 @@ function CardContent({ issue, projectKey: _projectKey, onDelete }: {
           <div className="size-5 rounded-full border border-dashed border-[var(--border)]" />
         )}
       </div>
+
+      {/* Sub-issue progress bar */}
+      {(issue.sub_issue_count ?? 0) > 0 && (
+        <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-[var(--surface-hover)]">
+          <div
+            className="h-full bg-[var(--accent)] transition-all duration-300"
+            style={{
+              width: `${Math.round((issue.completed_sub_issue_count ?? 0) / (issue.sub_issue_count ?? 1) * 100)}%`,
+            }}
+          />
+        </div>
+      )}
     </>
   )
 }

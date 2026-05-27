@@ -70,6 +70,13 @@ class Issue(BaseModel):
         on_delete=models.SET_NULL,
         related_name='issues',
     )
+    parent = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='sub_issues',
+    )
     due_date = models.DateField(null=True, blank=True)
     estimate = models.PositiveSmallIntegerField(null=True, blank=True)  # story points
 

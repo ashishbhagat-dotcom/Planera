@@ -59,7 +59,7 @@ class IssueViewSet(ModelViewSet):
                 project__key=project_key,
             )
             .select_related('creator', 'assignee', 'project')
-            .prefetch_related('labels')
+            .prefetch_related('labels', 'sub_issues__assignee')
             .order_by('position')
         )
 
@@ -93,7 +93,7 @@ class IssueViewSet(ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        serializer = IssueCreateSerializer(data=request.data, context={'request': request})
+        serializer = IssueCreateSerializer(data=request.data, context={'request': request, 'project': project})
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
@@ -107,6 +107,7 @@ class IssueViewSet(ModelViewSet):
             assignee_id=data.get('assignee_id'),
             due_date=data.get('due_date'),
             estimate=data.get('estimate'),
+            parent_id=data.get('parent_id'),
         )
         label_ids = data.get('label_ids', [])
         if label_ids:

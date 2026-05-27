@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { X, MessageSquare, Activity, Trash2 } from 'lucide-react'
+import { X, MessageSquare, Activity, Trash2, Plus, Circle, CircleDot, Timer, Eye, CheckCircle2, XCircle } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { useUiStore } from '@/shared/stores/uiStore'
 import { useKeyboardShortcut } from '@/shared/hooks/useKeyboardShortcut'
@@ -10,9 +10,32 @@ import { IssueProperties } from './IssueProperties'
 import { IssueComments } from './IssueComments'
 import { IssueActivity } from './IssueActivity'
 import { IssueDescription } from './IssueDescription'
+import { CreateIssueModal } from './CreateIssueModal'
 import { RoleGuard } from '@/shared/components/ui/RoleGuard'
 import { MemberRole } from '@/shared/types/enums'
 import type { Issue } from '@/shared/types/models'
+
+const SUB_STATUS_ICON: Record<string, React.ReactNode> = {
+  backlog:     <Circle size={12} className="text-[var(--text-muted)]" />,
+  todo:        <CircleDot size={12} className="text-gray-400" />,
+  in_progress: <Timer size={12} className="text-amber-400" />,
+  in_review:   <Eye size={12} className="text-blue-400" />,
+  done:        <CheckCircle2 size={12} className="text-emerald-500" />,
+  cancelled:   <XCircle size={12} className="text-red-400" />,
+}
+
+function SubIssueRow({ sub, onClick }: { sub: NonNullable<Issue['sub_issues']>[number]; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-[var(--surface-hover)]"
+    >
+      <span className="shrink-0">{SUB_STATUS_ICON[sub.status] ?? SUB_STATUS_ICON.backlog}</span>
+      <span className="font-mono text-[10px] text-[var(--text-muted)] shrink-0">{sub.identifier}</span>
+      <span className="truncate text-xs text-[var(--text-primary)]">{sub.title}</span>
+    </button>
+  )
+}
 
 function PanelSkeleton() {
   return (
@@ -30,6 +53,8 @@ function PanelSkeleton() {
 
 function PanelBody({ issue, projectKey }: { issue: Issue; projectKey: string }) {
   const [tab, setTab] = useState<'comments' | 'activity'>('comments')
+  const [showAddSubIssue, setShowAddSubIssue] = useState(false)
+  const setActiveIssueId = useUiStore((s) => s.setActiveIssueId)
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -39,11 +64,58 @@ function PanelBody({ issue, projectKey }: { issue: Issue; projectKey: string }) 
           {issue.identifier}
         </span>
 
+        {issue.parent && (
+          <button
+            onClick={() => setActiveIssueId(issue.parent!.identifier)}
+            className="mb-2 flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          >
+            <span className="shrink-0">{SUB_STATUS_ICON[issue.parent.status] ?? SUB_STATUS_ICON.backlog}</span>
+            <span className="font-mono">{issue.parent.identifier}</span>
+            <span className="truncate">{issue.parent.title}</span>
+          </button>
+        )}
+
         <h2 className="text-xl font-semibold leading-snug text-[var(--text-primary)]">
           {issue.title}
         </h2>
 
         <IssueDescription issue={issue} projectKey={projectKey} />
+
+        {/* Sub-issues */}
+        {!issue.parent_id && (
+          <div className="mt-6">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+                Sub-issues
+                {(issue.sub_issue_count ?? 0) > 0 && (
+                  <span className="ml-1.5 font-mono font-normal">
+                    {issue.completed_sub_issue_count ?? 0}/{issue.sub_issue_count}
+                  </span>
+                )}
+              </p>
+              <button
+                onClick={() => setShowAddSubIssue(true)}
+                className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+              >
+                <Plus size={11} />
+                Add
+              </button>
+            </div>
+            {issue.sub_issues && issue.sub_issues.length > 0 ? (
+              <div className="space-y-0.5">
+                {issue.sub_issues.map((sub) => (
+                  <SubIssueRow
+                    key={sub.id}
+                    sub={sub}
+                    onClick={() => setActiveIssueId(sub.identifier)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-[var(--text-muted)]">No sub-issues yet.</p>
+            )}
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="mt-8">
@@ -73,6 +145,15 @@ function PanelBody({ issue, projectKey }: { issue: Issue; projectKey: string }) 
           </div>
         </div>
       </div>
+
+      {showAddSubIssue && (
+        <CreateIssueModal
+          projectKey={projectKey}
+          parentId={issue.id}
+          parentIdentifier={issue.identifier}
+          onClose={() => setShowAddSubIssue(false)}
+        />
+      )}
 
       {/* Right sidebar — editable properties */}
       <div className="w-56 shrink-0 overflow-y-auto border-l border-[var(--border)] px-4 py-5">
@@ -148,7 +229,11 @@ export function IssueDetailPanel() {
             <RoleGuard roles={[MemberRole.OWNER, MemberRole.ADMIN]}>
               {confirmDelete ? (
                 <>
-                  <span className="mr-1 text-xs text-[var(--text-muted)]">Delete?</span>
+                  <span className="mr-1 text-xs text-[var(--text-muted)]">
+                    {(issue?.sub_issue_count ?? 0) > 0
+                      ? `Delete + ${issue!.sub_issue_count} sub-issues?`
+                      : 'Delete?'}
+                  </span>
                   <button
                     onClick={handleDelete}
                     disabled={isDeleting}

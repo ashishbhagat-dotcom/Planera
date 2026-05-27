@@ -54,6 +54,11 @@ export interface Issue {
   assignee: User | null
   labels: Label[]
   cycle_id: string | null
+  parent_id: string | null
+  parent?: { id: string; identifier: string; title: string; status: string; priority: string; assignee: User | null }
+  sub_issues?: { id: string; identifier: string; title: string; status: string; priority: string; assignee: User | null }[]
+  sub_issue_count?: number
+  completed_sub_issue_count?: number
   due_date: string | null
   estimate: number | null
   project: string

@@ -7,10 +7,12 @@ import { ApiError } from '@/shared/types/api'
 interface Props {
   projectKey: string
   defaultStatus?: string
+  parentId?: string
+  parentIdentifier?: string
   onClose: () => void
 }
 
-export function CreateIssueModal({ projectKey, defaultStatus = IssueStatus.BACKLOG, onClose }: Props) {
+export function CreateIssueModal({ projectKey, defaultStatus = IssueStatus.BACKLOG, parentId, parentIdentifier, onClose }: Props) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [status, setStatus] = useState(defaultStatus)
@@ -29,7 +31,7 @@ export function CreateIssueModal({ projectKey, defaultStatus = IssueStatus.BACKL
     e.preventDefault()
     setError('')
     try {
-      await createIssue.mutateAsync({ title, description, status, priority })
+      await createIssue.mutateAsync({ title, description, status, priority, parent_id: parentId ?? null })
       onClose()
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to create issue')
@@ -41,7 +43,8 @@ export function CreateIssueModal({ projectKey, defaultStatus = IssueStatus.BACKL
       <div className="w-full max-w-lg rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-xl">
         <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4">
           <h2 className="font-semibold text-[var(--text-primary)]">
-            Create issue · <span className="font-mono text-sm text-[var(--text-muted)]">{projectKey}</span>
+            {parentIdentifier ? 'Add sub-issue' : 'Create issue'} ·{' '}
+            <span className="font-mono text-sm text-[var(--text-muted)]">{projectKey}</span>
           </h2>
           <button onClick={onClose} className="rounded p-1 text-[var(--text-muted)] hover:bg-[var(--surface-hover)] transition-colors">
             <X size={16} />
@@ -49,6 +52,12 @@ export function CreateIssueModal({ projectKey, defaultStatus = IssueStatus.BACKL
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 p-5">
+          {parentIdentifier && (
+            <div className="flex items-center gap-1.5 rounded-md bg-[var(--surface-hover)] px-2.5 py-1.5 text-xs text-[var(--text-muted)]">
+              <span>Sub-issue of</span>
+              <span className="font-mono font-medium text-[var(--text-primary)]">{parentIdentifier}</span>
+            </div>
+          )}
           <input
             autoFocus
             value={title}

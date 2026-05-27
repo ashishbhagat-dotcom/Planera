@@ -93,11 +93,16 @@ export function IssueRow({ issue, onClick, showProject = false }: Props) {
         ))}
       </span>
 
-      {/* Due date */}
-      <span className="truncate text-xs text-[var(--text-muted)]">
-        {issue.due_date
-          ? formatDistanceToNow(new Date(issue.due_date), { addSuffix: true })
-          : ''}
+      {/* Due date + sub-issue count */}
+      <span className="flex items-center gap-2 truncate text-xs text-[var(--text-muted)]">
+        <span className="truncate">
+          {issue.due_date ? formatDistanceToNow(new Date(issue.due_date), { addSuffix: true }) : ''}
+        </span>
+        {(issue.sub_issue_count ?? 0) > 0 && (
+          <span className="shrink-0 font-mono text-[10px]">
+            ▸ {issue.completed_sub_issue_count ?? 0}/{issue.sub_issue_count}
+          </span>
+        )}
       </span>
 
       {/* Assignee */}

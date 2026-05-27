@@ -68,7 +68,7 @@ These are small but compound the quality of every feature added after them.
 |----|---------|----------|------------|------|---------------|
 | E01 | My Issues Page | High | Low | 3h | None |
 | E02 | Cycles (Sprints) ✅ COMPLETED | High | Medium | 6h | New table + FK on Issue |
-| E03 | Sub-Issues | High | Low-Med | 3h | nullable `parent_id` on Issue |
+| E03 | Sub-Issues ✅ COMPLETED | High | Low-Med | 3h | nullable `parent_id` on Issue |
 | E04 | Bulk Actions | High | Medium | 3.5h | None |
 | E05 | Favorites | Medium | Low | 2h | New table |
 | E06 | AI Issue Assistant | High | Medium | 5h | None |

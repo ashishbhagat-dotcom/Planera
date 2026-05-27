@@ -21,6 +21,7 @@ export interface CreateIssueData {
   label_ids?: string[]
   due_date?: string
   estimate?: number
+  parent_id?: string | null
 }
 
 export interface UpdateIssueData {
