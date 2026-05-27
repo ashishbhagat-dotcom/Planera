@@ -136,6 +136,11 @@ export function Sidebar() {
           </span>
           Notifications
         </button>
+        <SidebarNavLink
+          to="/app/settings"
+          icon={<Settings size={16} />}
+          label="Settings"
+        />
         <button
           onClick={toggleDarkMode}
           className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
@@ -184,11 +189,6 @@ export function Sidebar() {
                   <p className="truncate text-xs text-[var(--text-muted)]">{user?.email}</p>
                 </div>
               </div>
-              <DropdownMenu.Separator />
-              <DropdownMenu.Item onClick={() => navigate('/app/settings')}>
-                <Settings size={14} />
-                Profile &amp; Settings
-              </DropdownMenu.Item>
               <DropdownMenu.Separator />
               <DropdownMenu.Item destructive onClick={handleLogout}>
                 <LogOut size={14} />
