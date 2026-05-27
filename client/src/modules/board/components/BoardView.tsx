@@ -79,7 +79,7 @@ export function BoardView() {
           ))}
         </div>
 
-        <DragOverlay dropAnimation={{ duration: 150, easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)' }}>
+        <DragOverlay dropAnimation={null}>
           {activeCard ? (
             <BoardCardOverlay issue={activeCard} projectKey={projectKey} />
           ) : null}

@@ -6,6 +6,7 @@ import { formatDistanceToNow } from 'date-fns'
 import type { Issue } from '@/shared/types/models'
 import { IssueStatus, IssuePriority } from '@/shared/types/enums'
 import { cn } from '@/shared/lib/utils'
+import { useUiStore } from '@/shared/stores/uiStore'
 
 // --- Status indicator ---
 const STATUS_ICON: Record<IssueStatus, React.ReactNode> = {
@@ -39,13 +40,14 @@ function AssigneeAvatar({ name, avatarUrl }: { name: string; avatarUrl?: string 
 
 interface Props {
   issue: Issue
-  onClick: () => void
+  onClick?: () => void
 }
 
 export function IssueRow({ issue, onClick }: Props) {
+  const setActiveIssueId = useUiStore((s) => s.setActiveIssueId)
   return (
     <button
-      onClick={onClick}
+      onClick={() => { setActiveIssueId(issue.identifier); onClick?.() }}
       className={cn(
         'group grid h-9 w-full items-center border-b border-[var(--border)] px-4',
         'text-left transition-colors hover:bg-[var(--surface-hover)]',

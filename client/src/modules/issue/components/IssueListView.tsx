@@ -133,11 +133,7 @@ export function IssueListView() {
           </div>
         ) : (
           issues.map((issue) => (
-            <IssueRow
-              key={issue.id}
-              issue={issue}
-              onClick={() => {/* IssueDetailPanel wired in T28 */}}
-            />
+            <IssueRow key={issue.id} issue={issue} />
           ))
         )}
       </div>

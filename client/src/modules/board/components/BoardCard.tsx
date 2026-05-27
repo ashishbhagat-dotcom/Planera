@@ -124,8 +124,8 @@ export function BoardCardOverlay({ issue, projectKey }: { issue: Issue; projectK
 
   return (
     <div
-      className="group relative cursor-grabbing rounded-md border border-[var(--accent)]/40 bg-[var(--surface)] p-3 text-sm shadow-2xl"
-      style={{ transform: 'rotate(1.5deg)', opacity: 0.95 }}
+      className="group relative cursor-grabbing rounded-md border border-[var(--border)] bg-[var(--surface)] p-3 text-sm opacity-90 shadow-md"
+      style={{ transform: 'rotate(1.5deg)' }}
     >
       <CardContent
         issue={issue}

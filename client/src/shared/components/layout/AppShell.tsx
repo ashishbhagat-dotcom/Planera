@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { BreadcrumbNav } from './BreadcrumbNav'
+import { IssueDetailPanel } from '@/modules/issue/components/IssueDetailPanel'
 import { useUiStore } from '@/shared/stores/uiStore'
 import { cn } from '@/shared/lib/utils'
 import { PanelLeft } from 'lucide-react'
@@ -37,6 +38,8 @@ export function AppShell() {
           <Outlet />
         </main>
       </div>
+
+      <IssueDetailPanel />
     </div>
   )
 }
