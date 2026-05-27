@@ -43,7 +43,7 @@ export function ProjectList() {
             <p className="mt-0.5 text-sm text-[var(--text-muted)]">{workspace.name}</p>
           )}
         </div>
-        <RoleGuard roles={[MemberRole.OWNER, MemberRole.ADMIN]}>
+        <RoleGuard roles={[MemberRole.OWNER]}>
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-1.5 rounded-md bg-[var(--accent)] px-3 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
@@ -64,7 +64,7 @@ export function ProjectList() {
           </div>
           <h3 className="mt-4 font-semibold text-[var(--text-primary)]">No projects yet</h3>
           <p className="mt-1 text-sm text-[var(--text-muted)]">Create your first project to start tracking issues.</p>
-          <RoleGuard roles={[MemberRole.OWNER, MemberRole.ADMIN]}>
+          <RoleGuard roles={[MemberRole.OWNER]}>
             <button
               onClick={() => setShowCreate(true)}
               className="mt-4 flex items-center gap-1.5 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"

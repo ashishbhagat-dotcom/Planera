@@ -8,7 +8,7 @@ from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import mixins
 
 from core.permissions import OrgScopedPermission
-from organizations.permissions import IsOrgMember
+from organizations.permissions import IsOrgAdminOrOwner, IsOrgMember
 from .filters import IssueFilterSet
 from .models import Comment, Issue, Label
 from .serializers import (
@@ -36,6 +36,11 @@ class IsAuthorOrReadOnly(BasePermission):
 class IssueViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, OrgScopedPermission, IsOrgMember)
     lookup_field = 'identifier'
+
+    def get_permissions(self):
+        if self.action == 'destroy':
+            return [IsAuthenticated(), OrgScopedPermission(), IsOrgAdminOrOwner()]
+        return super().get_permissions()
     filterset_class = IssueFilterSet
     ordering_fields = ('position', 'created_at', 'priority', 'status')
     ordering = ('position',)
