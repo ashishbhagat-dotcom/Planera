@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
-  User, Building2, Users, Check, Loader2, Trash2,
+  Building2, Users, Check, Loader2, Trash2,
   ShieldCheck, Shield, UserCircle, Crown,
 } from 'lucide-react'
 import toast from 'react-hot-toast'

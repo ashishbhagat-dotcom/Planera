@@ -3,6 +3,7 @@ import toast from 'react-hot-toast'
 import { issueApi, type CreateIssueData, type MoveIssueData, type UpdateIssueData } from '../services/issueApi'
 import { queryKeys } from '@/shared/lib/queryClient'
 import type { Issue } from '@/shared/types/models'
+import type { IssueStatus } from '@/shared/types/enums'
 
 export function useMoveIssue(projectKey: string) {
   const qc = useQueryClient()
@@ -21,7 +22,7 @@ export function useMoveIssue(projectKey: string) {
         if (!issues) return
         qc.setQueryData<Issue[]>(
           key,
-          issues.map((i) => (i.identifier === identifier ? { ...i, status, position } : i)),
+          issues.map((i) => (i.identifier === identifier ? { ...i, status: status as IssueStatus, position } : i)),
         )
       })
 

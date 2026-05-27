@@ -28,7 +28,7 @@ export const queryKeys = {
     detail: (key: string) => ['projects', 'detail', key] as const,
   },
   issues: {
-    all: (projectKey: string, filters?: Record<string, unknown>) =>
+    all: (projectKey: string, filters?: unknown) =>
       ['issues', projectKey, filters] as const,
     detail: (identifier: string) => ['issues', 'detail', identifier] as const,
     comments: (identifier: string) => ['issues', identifier, 'comments'] as const,

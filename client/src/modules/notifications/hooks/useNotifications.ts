@@ -14,7 +14,6 @@ export function useNotifications() {
 
 export function useMarkAllRead() {
   const qc = useQueryClient()
-  const workspace = useCurrentWorkspace()
   return useMutation({
     mutationFn: notifApi.markAllRead,
     onSuccess: () => {

@@ -22,7 +22,7 @@ const PRIORITY_ICON: Record<IssuePriority, React.ReactNode> = {
 }
 
 // Shared visual content — no dnd hooks
-function CardContent({ issue, projectKey, onDelete }: {
+function CardContent({ issue, projectKey: _projectKey, onDelete }: {
   issue: Issue
   projectKey: string
   onDelete: () => void

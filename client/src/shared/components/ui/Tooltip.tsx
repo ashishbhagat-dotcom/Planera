@@ -13,7 +13,7 @@ function Tooltip({ content, children, delay = 600, className }: TooltipProps) {
   const [visible, setVisible] = useState(false)
   const [pos, setPos] = useState({ top: 0, left: 0 })
   const triggerRef = useRef<HTMLDivElement>(null)
-  const timerRef = useRef<ReturnType<typeof setTimeout>>()
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const show = () => {
     timerRef.current = setTimeout(() => {

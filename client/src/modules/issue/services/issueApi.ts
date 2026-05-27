@@ -22,7 +22,16 @@ export interface CreateIssueData {
   estimate?: number
 }
 
-export interface UpdateIssueData extends Partial<CreateIssueData> {}
+export interface UpdateIssueData {
+  title?: string
+  description?: string
+  status?: string
+  priority?: string
+  assignee_id?: string | null
+  label_ids?: string[]
+  due_date?: string | null
+  estimate?: number | null
+}
 
 export interface MoveIssueData {
   status: string

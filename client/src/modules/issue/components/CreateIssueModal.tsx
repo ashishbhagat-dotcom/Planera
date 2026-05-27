@@ -14,7 +14,7 @@ export function CreateIssueModal({ projectKey, defaultStatus = IssueStatus.BACKL
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [status, setStatus] = useState(defaultStatus)
-  const [priority, setPriority] = useState(IssuePriority.NONE)
+  const [priority, setPriority] = useState<IssuePriority>(IssuePriority.NONE)
   const [error, setError] = useState('')
 
   const createIssue = useCreateIssue(projectKey)

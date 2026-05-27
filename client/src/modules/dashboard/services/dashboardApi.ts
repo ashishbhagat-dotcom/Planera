@@ -10,7 +10,7 @@ export interface DashboardStats {
 }
 
 export const dashboardApi = {
-  getStats(workspaceSlug: string, projectKey?: string): Promise<DashboardStats> {
+  getStats(_workspaceSlug: string, projectKey?: string): Promise<DashboardStats> {
     const params = projectKey ? { project_key: projectKey } : {}
     return apiClient
       .get<DashboardStats>('/analytics/dashboard/', { params })
