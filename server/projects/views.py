@@ -41,17 +41,6 @@ class ProjectViewSet(ModelViewSet):
                 {'error': {'code': 'no_workspace', 'message': 'X-Organization-Slug header required.'}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        return super().create(request, *args, **kwargs)
-
-    def perform_create(self, serializer):
-        serializer.save()
-
-    def create(self, request, *args, **kwargs):
-        if not request.organization:
-            return Response(
-                {'error': {'code': 'no_workspace', 'message': 'X-Organization-Slug header required.'}},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         project = serializer.save()

@@ -86,12 +86,12 @@ class IssueService:
         issue._skip_activity = True
         issue.save(update_fields=list(data.keys()) + ['updated_at'])
 
-        if changed:
+        for field, diff in changed.items():
             Activity.objects.create(
                 issue=issue,
                 actor=actor,
                 verb=Activity.UPDATED,
-                data=changed,
+                data={'field': field, 'from': diff['from'], 'to': diff['to']},
             )
 
         new_assignee_id = issue.assignee_id

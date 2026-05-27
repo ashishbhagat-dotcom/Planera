@@ -29,12 +29,14 @@ function verbSentence(activity: Activity): string {
     }
     case 'updated': {
       const field = data.field as string | undefined
+      const from = data.from as string | null | undefined
+      const to = data.to as string | null | undefined
       if (field === 'title') return 'updated the title'
       if (field === 'description') return 'updated the description'
-      if (field === 'priority')
-        return `changed priority from ${data.from ?? '—'} to ${data.to ?? '—'}`
-      if (field === 'due_date') return `set due date to ${data.to ?? 'none'}`
-      if (field === 'estimate') return `set estimate to ${data.to ?? 'none'}`
+      if (field === 'priority') return `changed priority from ${from ?? '—'} to ${to ?? '—'}`
+      if (field === 'due_date') return `set due date to ${to ?? 'none'}`
+      if (field === 'estimate') return `set estimate to ${to ?? 'none'}`
+      if (field === 'assignee_id') return to ? `changed assignee` : 'removed assignee'
       return 'updated this issue'
     }
     case 'deleted':

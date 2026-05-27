@@ -1,6 +1,10 @@
+import logging
+
 from asgiref.sync import async_to_sync
 from celery import shared_task
 from channels.layers import get_channel_layer
+
+logger = logging.getLogger(__name__)
 
 
 @shared_task(name='notifications.create_and_push_notification')
@@ -24,18 +28,21 @@ def create_and_push_notification(recipient_id: str, org_id: str, notif_type: str
         data=data,
     )
 
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        f'notifications_{recipient_id}',
-        {
-            'type': 'notification.new',
-            'data': {
+    try:
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'notifications_{recipient_id}',
+            {
                 'type': 'notification.new',
-                'id': str(notification.id),
-                'notif_type': notif_type,
-                'title': title,
-                'data': data,
-                'created_at': notification.created_at.isoformat(),
+                'data': {
+                    'type': 'notification.new',
+                    'id': str(notification.id),
+                    'notif_type': notif_type,
+                    'title': title,
+                    'data': data,
+                    'created_at': notification.created_at.isoformat(),
+                },
             },
-        },
-    )
+        )
+    except Exception:
+        logger.exception('Failed to push notification %s to %s', notif_type, recipient_id)

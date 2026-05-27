@@ -164,6 +164,14 @@ class IssueViewSet(ModelViewSet):
             body=serializer.validated_data['body'],
         )
 
+        from .models import Activity
+        Activity.objects.create(
+            issue=issue,
+            actor=request.user,
+            verb=Activity.COMMENTED,
+            data={'comment_id': str(comment.id)},
+        )
+
         from .tasks import broadcast_board_update
         broadcast_board_update(
             issue.project.key,

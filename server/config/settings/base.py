@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django_filters',
     'channels',
     # Local apps
+    'core',
     'users',
     'organizations',
     'projects',
