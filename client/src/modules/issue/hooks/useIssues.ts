@@ -1,6 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/shared/lib/queryClient'
 import { issueApi, type CreateIssueData, type IssueFilters, type UpdateIssueData, type MoveIssueData } from '../services/issueApi'
+import type { Label } from '@/shared/types/models'
+
+export function useLabels() {
+  return useQuery<Label[]>({
+    queryKey: ['labels'],
+    queryFn: () => issueApi.listLabels(),
+    staleTime: 5 * 60 * 1000,
+  })
+}
 
 export function useIssues(projectKey: string, filters: IssueFilters = {}) {
   return useQuery({

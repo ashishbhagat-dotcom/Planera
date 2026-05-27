@@ -1,6 +1,6 @@
 import { apiClient } from '@/shared/lib/api'
 import type { PaginatedResponse } from '@/shared/types/api'
-import type { Activity, Comment, Issue } from '@/shared/types/models'
+import type { Activity, Comment, Issue, Label } from '@/shared/types/models'
 
 export interface IssueFilters {
   status?: string
@@ -92,6 +92,11 @@ export const issueApi = {
 
   search: async (q: string): Promise<Issue[]> => {
     const res = await apiClient.get<PaginatedResponse<Issue>>('/search/', { params: { q } })
+    return res.data.results
+  },
+
+  listLabels: async (): Promise<Label[]> => {
+    const res = await apiClient.get<PaginatedResponse<Label>>('/labels/')
     return res.data.results
   },
 }

@@ -62,14 +62,34 @@ export function useUpdateIssue(projectKey: string, identifier: string) {
   return useMutation({
     mutationFn: (data: UpdateIssueData) => issueApi.update(projectKey, identifier, data),
 
+    onMutate: async (data) => {
+      await qc.cancelQueries({ queryKey: queryKeys.issues.detail(identifier) })
+      const snapshot = qc.getQueryData<Issue>(queryKeys.issues.detail(identifier))
+      if (snapshot) {
+        // Optimistically update scalar fields; relational fields (assignee, labels)
+        // are corrected by onSuccess with the full server response.
+        qc.setQueryData<Issue>(queryKeys.issues.detail(identifier), {
+          ...snapshot,
+          ...(data.status    !== undefined && { status: data.status as Issue['status'] }),
+          ...(data.priority  !== undefined && { priority: data.priority as Issue['priority'] }),
+          ...(data.title     !== undefined && { title: data.title }),
+          ...(data.due_date  !== undefined && { due_date: data.due_date ?? null }),
+          ...(data.estimate  !== undefined && { estimate: data.estimate ?? null }),
+        })
+      }
+      return { snapshot }
+    },
+
+    onError: (_err, _vars, context) => {
+      if (context?.snapshot) {
+        qc.setQueryData(queryKeys.issues.detail(identifier), context.snapshot)
+      }
+      toast.error('Failed to update issue')
+    },
+
     onSuccess: (updated) => {
       qc.setQueryData(queryKeys.issues.detail(identifier), updated)
       qc.invalidateQueries({ queryKey: ['issues', projectKey] })
-      toast.success('Issue updated')
-    },
-
-    onError: () => {
-      toast.error('Failed to update issue')
     },
   })
 }
