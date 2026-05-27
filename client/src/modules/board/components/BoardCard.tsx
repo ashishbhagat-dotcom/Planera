@@ -6,9 +6,10 @@ import {
 } from 'lucide-react'
 import { DropdownMenu } from '@/shared/components/ui/DropdownMenu'
 import { Avatar } from '@/shared/components/ui/Avatar'
+import { RoleGuard } from '@/shared/components/ui/RoleGuard'
 import { cn } from '@/shared/lib/utils'
 import type { Issue } from '@/shared/types/models'
-import { IssuePriority } from '@/shared/types/enums'
+import { IssuePriority, MemberRole } from '@/shared/types/enums'
 import { useDeleteIssue } from '@/modules/issue/hooks/useIssueMutations'
 import { useUiStore } from '@/shared/stores/uiStore'
 
@@ -35,17 +36,19 @@ function CardContent({ issue, projectKey, onDelete }: {
           <span className="font-mono text-[11px] text-[var(--text-muted)]">{issue.identifier}</span>
         </div>
 
-        <DropdownMenu>
-          <DropdownMenu.Trigger className="cursor-pointer rounded p-0.5 opacity-0 transition-opacity hover:bg-[var(--surface-hover)] group-hover:opacity-100">
-            <MoreVertical size={13} className="text-[var(--text-muted)]" />
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Content align="right">
-            <DropdownMenu.Item destructive onClick={onDelete}>
-              <Trash2 size={13} />
-              Delete
-            </DropdownMenu.Item>
-          </DropdownMenu.Content>
-        </DropdownMenu>
+        <RoleGuard roles={[MemberRole.OWNER, MemberRole.ADMIN]}>
+          <DropdownMenu>
+            <DropdownMenu.Trigger className="cursor-pointer rounded p-0.5 opacity-0 transition-opacity hover:bg-[var(--surface-hover)] group-hover:opacity-100">
+              <MoreVertical size={13} className="text-[var(--text-muted)]" />
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content align="right">
+              <DropdownMenu.Item destructive onClick={onDelete}>
+                <Trash2 size={13} />
+                Delete
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu>
+        </RoleGuard>
       </div>
 
       {/* Title */}

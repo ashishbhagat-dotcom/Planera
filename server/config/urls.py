@@ -26,4 +26,5 @@ urlpatterns = [
     path('api/v1/', include('issues.urls')),
     path('api/v1/search/', SearchView.as_view(), name='search'),
     path('api/v1/notifications/', include('notifications.urls')),
+    path('api/v1/analytics/', include('analytics.urls')),
 ]

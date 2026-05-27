@@ -158,6 +158,14 @@ class IssueViewSet(ModelViewSet):
             author=request.user,
             body=serializer.validated_data['body'],
         )
+
+        from .tasks import broadcast_board_update
+        broadcast_board_update(
+            issue.project.key,
+            'comment.created',
+            {'identifier': issue.identifier, 'comment_id': str(comment.id)},
+        )
+
         return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)
 
 

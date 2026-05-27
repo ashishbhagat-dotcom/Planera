@@ -62,6 +62,11 @@ export function useBoardSocket(projectKey: string) {
       qc.invalidateQueries({ queryKey: queryKeys.issues.detail(identifier) })
     })
 
+    ws.subscribe('comment.created', (msg) => {
+      const { identifier } = msg as { identifier: string }
+      qc.invalidateQueries({ queryKey: queryKeys.issues.comments(identifier) })
+    })
+
     ws.connect()
 
     return () => ws.disconnect()

@@ -4,7 +4,9 @@ import { useProjects } from '../hooks/useProjects'
 import { ProjectCard } from './ProjectCard'
 import { CreateProjectModal } from './CreateProjectModal'
 import { Skeleton } from '@/shared/components/ui/Skeleton'
+import { RoleGuard } from '@/shared/components/ui/RoleGuard'
 import { useCurrentWorkspace } from '@/modules/workspace/hooks/useWorkspace'
+import { MemberRole } from '@/shared/types/enums'
 
 function ProjectGridSkeleton() {
   return (
@@ -41,13 +43,15 @@ export function ProjectList() {
             <p className="mt-0.5 text-sm text-[var(--text-muted)]">{workspace.name}</p>
           )}
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 rounded-md bg-[var(--accent)] px-3 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-        >
-          <Plus size={15} />
-          New project
-        </button>
+        <RoleGuard roles={[MemberRole.OWNER, MemberRole.ADMIN]}>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-1.5 rounded-md bg-[var(--accent)] px-3 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+          >
+            <Plus size={15} />
+            New project
+          </button>
+        </RoleGuard>
       </div>
 
       {/* Content */}
@@ -60,13 +64,15 @@ export function ProjectList() {
           </div>
           <h3 className="mt-4 font-semibold text-[var(--text-primary)]">No projects yet</h3>
           <p className="mt-1 text-sm text-[var(--text-muted)]">Create your first project to start tracking issues.</p>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="mt-4 flex items-center gap-1.5 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-          >
-            <Plus size={15} />
-            Create project
-          </button>
+          <RoleGuard roles={[MemberRole.OWNER, MemberRole.ADMIN]}>
+            <button
+              onClick={() => setShowCreate(true)}
+              className="mt-4 flex items-center gap-1.5 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+            >
+              <Plus size={15} />
+              Create project
+            </button>
+          </RoleGuard>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

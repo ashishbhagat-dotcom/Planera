@@ -10,6 +10,8 @@ import { IssueProperties } from './IssueProperties'
 import { IssueComments } from './IssueComments'
 import { IssueActivity } from './IssueActivity'
 import { IssueDescription } from './IssueDescription'
+import { RoleGuard } from '@/shared/components/ui/RoleGuard'
+import { MemberRole } from '@/shared/types/enums'
 import type { Issue } from '@/shared/types/models'
 
 function PanelSkeleton() {
@@ -143,32 +145,34 @@ export function IssueDetailPanel() {
             {activeIssueId ?? ''}
           </span>
           <div className="flex items-center gap-1">
-            {confirmDelete ? (
-              <>
-                <span className="mr-1 text-xs text-[var(--text-muted)]">Delete?</span>
+            <RoleGuard roles={[MemberRole.OWNER, MemberRole.ADMIN]}>
+              {confirmDelete ? (
+                <>
+                  <span className="mr-1 text-xs text-[var(--text-muted)]">Delete?</span>
+                  <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="rounded px-2 py-1 text-xs font-medium text-red-500 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+                  >
+                    {isDeleting ? 'Deleting…' : 'Confirm'}
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    className="rounded px-2 py-1 text-xs text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)]"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
                 <button
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  className="rounded px-2 py-1 text-xs font-medium text-red-500 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+                  onClick={() => setConfirmDelete(true)}
+                  className="rounded p-1 text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)] hover:text-red-500"
+                  aria-label="Delete issue"
                 >
-                  {isDeleting ? 'Deleting…' : 'Confirm'}
+                  <Trash2 size={15} />
                 </button>
-                <button
-                  onClick={() => setConfirmDelete(false)}
-                  className="rounded px-2 py-1 text-xs text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)]"
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => setConfirmDelete(true)}
-                className="rounded p-1 text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)] hover:text-red-500"
-                aria-label="Delete issue"
-              >
-                <Trash2 size={15} />
-              </button>
-            )}
+              )}
+            </RoleGuard>
             <button
               onClick={close}
               className="rounded p-1 text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"

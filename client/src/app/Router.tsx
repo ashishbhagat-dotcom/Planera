@@ -7,6 +7,7 @@ import { AppShell } from '@/shared/components/layout/AppShell'
 import { ProjectList } from '@/modules/project/components/ProjectList'
 import { IssueListView } from '@/modules/issue/components/IssueListView'
 import { BoardView } from '@/modules/board/components/BoardView'
+import { DashboardPage } from '@/modules/dashboard/components/DashboardPage'
 import type { ReactNode } from 'react'
 
 function PlaceholderPage({ name }: { name: string }) {
@@ -51,7 +52,7 @@ export function AppRouter() {
             }
           >
             <Route index element={<Navigate to="/app/dashboard" replace />} />
-            <Route path="dashboard" element={<PlaceholderPage name="Dashboard" />} />
+            <Route path="dashboard" element={<DashboardPage />} />
             <Route path="projects" element={<ProjectList />} />
             <Route path="projects/:key/board" element={<BoardView />} />
             <Route path="projects/:key/issues" element={<IssueListView />} />
