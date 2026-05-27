@@ -8,6 +8,7 @@ import { ProjectList } from '@/modules/project/components/ProjectList'
 import { IssueListView } from '@/modules/issue/components/IssueListView'
 import { BoardView } from '@/modules/board/components/BoardView'
 import { DashboardPage } from '@/modules/dashboard/components/DashboardPage'
+import { SettingsPage } from '@/app/pages/SettingsPage'
 import type { ReactNode } from 'react'
 
 function PlaceholderPage({ name }: { name: string }) {
@@ -57,7 +58,7 @@ export function AppRouter() {
             <Route path="projects/:key/board" element={<BoardView />} />
             <Route path="projects/:key/issues" element={<IssueListView />} />
             <Route path="notifications" element={<PlaceholderPage name="Notifications" />} />
-            <Route path="settings" element={<PlaceholderPage name="Settings" />} />
+            <Route path="settings" element={<SettingsPage />} />
           </Route>
 
           {/* Root redirect */}
