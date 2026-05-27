@@ -1,9 +1,19 @@
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { useSession } from '@/modules/auth/hooks/useSession'
 import { useAuthStore } from '@/modules/auth/stores/authStore'
 
 function SessionLoader() {
   useSession()
+  const clearAuth = useAuthStore((s) => s.clearAuth)
+
+  // When the Axios interceptor fails to refresh (expired/invalid session),
+  // it dispatches 'auth:logout' so we clear state here and ProtectedRoute redirects.
+  useEffect(() => {
+    const handler = () => clearAuth()
+    window.addEventListener('auth:logout', handler)
+    return () => window.removeEventListener('auth:logout', handler)
+  }, [clearAuth])
+
   return null
 }
 

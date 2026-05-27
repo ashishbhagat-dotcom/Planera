@@ -83,9 +83,10 @@ apiClient.interceptors.response.use(
         }
         return apiClient(original)
       } catch {
-        // Refresh failed — clear token and let callers handle redirect
+        // Refresh failed — broadcast so AuthProvider clears state and ProtectedRoute redirects
         setAccessToken(null)
         refreshQueue = []
+        window.dispatchEvent(new CustomEvent('auth:logout'))
         return Promise.reject(error)
       } finally {
         isRefreshing = false
