@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Loader2 } from 'lucide-react'
 import { useCreateIssue } from '../hooks/useIssues'
 import { IssueStatus, IssuePriority } from '@/shared/types/enums'
@@ -18,6 +18,12 @@ export function CreateIssueModal({ projectKey, defaultStatus = IssueStatus.BACKL
   const [error, setError] = useState('')
 
   const createIssue = useCreateIssue(projectKey)
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

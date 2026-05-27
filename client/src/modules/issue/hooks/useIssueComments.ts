@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
 import { queryKeys } from '@/shared/lib/queryClient'
 import { issueApi } from '../services/issueApi'
 import { useAuthStore } from '@/modules/auth/stores/authStore'
@@ -43,6 +44,7 @@ export function useAddComment(projectKey: string, identifier: string) {
       if (ctx?.snapshot !== undefined) {
         queryClient.setQueryData(queryKeys.issues.comments(identifier), ctx.snapshot)
       }
+      toast.error('Failed to post comment')
     },
 
     onSuccess: (created, _body, ctx) => {
@@ -73,6 +75,7 @@ export function useDeleteComment(projectKey: string, identifier: string) {
       if (ctx?.snapshot !== undefined) {
         queryClient.setQueryData(queryKeys.issues.comments(identifier), ctx.snapshot)
       }
+      toast.error('Failed to delete comment')
     },
   })
 }
@@ -88,6 +91,10 @@ export function useEditComment(projectKey: string, identifier: string) {
       queryClient.setQueryData<Comment[]>(queryKeys.issues.comments(identifier), (prev) =>
         (prev ?? []).map((c) => (c.id === updated.id ? updated : c)),
       )
+    },
+
+    onError: () => {
+      toast.error('Failed to update comment')
     },
   })
 }

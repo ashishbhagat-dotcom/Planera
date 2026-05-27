@@ -1,35 +1,22 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { LayoutGrid, List, Plus, ListTodo } from 'lucide-react'
+import { LayoutGrid, List, Plus, ListTodo, RefreshCw } from 'lucide-react'
 import { useIssues } from '../hooks/useIssues'
 import { IssueRow } from './IssueRow'
+import { IssueListSkeleton } from './IssueListSkeleton'
 import { CreateIssueModal } from './CreateIssueModal'
-import { Skeleton } from '@/shared/components/ui/Skeleton'
+import { EmptyState } from '@/shared/components/data/EmptyState'
+import { RoleGuard } from '@/shared/components/ui/RoleGuard'
 import { useProject } from '@/modules/project/hooks/useProjects'
 import { useUiStore } from '@/shared/stores/uiStore'
 import { cn } from '@/shared/lib/utils'
-import { IssueStatus } from '@/shared/types/enums'
+import { IssueStatus, MemberRole } from '@/shared/types/enums'
 
 const STATUS_OPTIONS = [
   { value: '', label: 'All statuses' },
   ...Object.values(IssueStatus).map((s) => ({ value: s, label: s.replace('_', ' ') })),
 ]
 
-function IssueListSkeleton() {
-  return (
-    <div className="divide-y divide-[var(--border)]">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="flex h-9 items-center gap-3 px-4">
-          <Skeleton className="size-3.5 rounded-full" />
-          <Skeleton className="size-3.5 rounded-full" />
-          <Skeleton className="h-3 w-16 rounded" />
-          <Skeleton className="h-3 flex-1 rounded" />
-          <Skeleton className="size-5 rounded-full" />
-        </div>
-      ))}
-    </div>
-  )
-}
 
 export function IssueListView() {
   const { key = '' } = useParams<{ key: string }>()
@@ -39,7 +26,7 @@ export function IssueListView() {
   const [statusFilter, setStatusFilter] = useState('')
 
   const { data: project } = useProject(key)
-  const { data: issues = [], isLoading } = useIssues(key, {
+  const { data: issues = [], isLoading, isError, refetch } = useIssues(key, {
     status: statusFilter || undefined,
   })
 
@@ -112,25 +99,44 @@ export function IssueListView() {
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
           <IssueListSkeleton />
-        ) : issues.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="flex size-14 items-center justify-center rounded-xl bg-[var(--surface-hover)] text-[var(--text-muted)]">
-              <ListTodo size={24} />
-            </div>
-            <h3 className="mt-4 font-semibold text-[var(--text-primary)]">No issues found</h3>
-            <p className="mt-1 text-sm text-[var(--text-muted)]">
-              {statusFilter ? 'Try changing the status filter.' : 'Create your first issue to get started.'}
-            </p>
-            {!statusFilter && (
+        ) : isError ? (
+          <EmptyState
+            icon={<RefreshCw size={24} />}
+            title="Failed to load issues"
+            description="Something went wrong. Check your connection and try again."
+            action={
               <button
-                onClick={() => setShowCreate(true)}
-                className="mt-4 flex items-center gap-1.5 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                onClick={() => refetch()}
+                className="flex items-center gap-1.5 rounded-md border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-hover)]"
               >
-                <Plus size={15} />
-                Create issue
+                <RefreshCw size={14} />
+                Retry
               </button>
-            )}
-          </div>
+            }
+          />
+        ) : issues.length === 0 ? (
+          <EmptyState
+            icon={<ListTodo size={24} />}
+            title="No issues found"
+            description={
+              statusFilter
+                ? 'Try changing the status filter.'
+                : 'Create your first issue to get started.'
+            }
+            action={
+              !statusFilter ? (
+                <RoleGuard roles={[MemberRole.OWNER, MemberRole.ADMIN, MemberRole.MEMBER]}>
+                  <button
+                    onClick={() => setShowCreate(true)}
+                    className="flex items-center gap-1.5 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                  >
+                    <Plus size={15} />
+                    Create issue
+                  </button>
+                </RoleGuard>
+              ) : undefined
+            }
+          />
         ) : (
           issues.map((issue) => (
             <IssueRow key={issue.id} issue={issue} />

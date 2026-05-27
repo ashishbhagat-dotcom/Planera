@@ -101,8 +101,8 @@ export function BoardCard({ issue, projectKey }: { issue: Issue; projectKey: str
       {...listeners}
       className={cn(
         'group relative cursor-grab rounded-md border border-[var(--border)] bg-[var(--surface)]',
-        'p-3 text-sm hover:border-[var(--accent)]/40 hover:bg-[var(--surface-hover)]',
-        isDragging && 'opacity-40',
+        'p-3 text-sm transition-shadow hover:border-[var(--accent)]/40 hover:bg-[var(--surface-hover)] hover:shadow-sm',
+        isDragging && 'opacity-30',
       )}
       onClick={() => setActiveIssueId(issue.identifier)}
     >
@@ -121,8 +121,8 @@ export function BoardCardOverlay({ issue, projectKey }: { issue: Issue; projectK
 
   return (
     <div
-      className="group relative cursor-grabbing rounded-md border border-[var(--border)] bg-[var(--surface)] p-3 text-sm opacity-90 shadow-md"
-      style={{ transform: 'rotate(1.5deg)' }}
+      className="group relative cursor-grabbing rounded-md border border-[var(--accent)]/30 bg-[var(--surface)] p-3 text-sm opacity-95 shadow-[0_8px_24px_rgba(0,0,0,0.18)]"
+      style={{ transform: 'rotate(2deg)' }}
     >
       <CardContent
         issue={issue}

@@ -8,6 +8,8 @@ import {
   Bell,
   PanelLeft,
   LogOut,
+  Moon,
+  Sun,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { useUiStore } from '@/shared/stores/uiStore'
@@ -47,6 +49,7 @@ export function Sidebar() {
   const { key } = useParams<{ key?: string }>()
   const toggleSidebar = useUiStore((s) => s.toggleSidebar)
   const toggleNotificationPanel = useUiStore((s) => s.toggleNotificationPanel)
+  const { darkMode, toggleDarkMode } = useUiStore()
   const { logout, user } = useAuth()
   const navigate = useNavigate()
   useWorkspaces() // hydrates workspaceStore on mount
@@ -135,6 +138,14 @@ export function Sidebar() {
           icon={<Settings size={16} />}
           label="Settings"
         />
+        <button
+          onClick={toggleDarkMode}
+          className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+          aria-label="Toggle dark mode"
+        >
+          {darkMode ? <Sun size={16} className="shrink-0" /> : <Moon size={16} className="shrink-0" />}
+          {darkMode ? 'Light mode' : 'Dark mode'}
+        </button>
         <button
           onClick={handleLogout}
           className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)] hover:text-red-400"
