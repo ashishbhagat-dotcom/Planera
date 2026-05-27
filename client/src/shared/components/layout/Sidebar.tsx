@@ -1,4 +1,4 @@
-import { NavLink, useNavigate, useParams } from 'react-router-dom'
+import { NavLink, useParams } from 'react-router-dom'
 import {
   LayoutDashboard,
   Layers,
@@ -7,19 +7,14 @@ import {
   Settings,
   Bell,
   PanelLeft,
-  LogOut,
   Moon,
   Sun,
-  ChevronUp,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { useUiStore } from '@/shared/stores/uiStore'
 import { WorkspaceSwitcher } from '@/modules/workspace/components/WorkspaceSwitcher'
 import { useWorkspaces } from '@/modules/workspace/hooks/useWorkspace'
-import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { useNotifications } from '@/modules/notifications/hooks/useNotifications'
-import { Avatar } from '@/shared/components/ui/Avatar'
-import { DropdownMenu } from '@/shared/components/ui/DropdownMenu'
 
 interface NavItem {
   label: string
@@ -53,16 +48,9 @@ export function Sidebar() {
   const toggleSidebar = useUiStore((s) => s.toggleSidebar)
   const toggleNotificationPanel = useUiStore((s) => s.toggleNotificationPanel)
   const { darkMode, toggleDarkMode } = useUiStore()
-  const { logout, user } = useAuth()
-  const navigate = useNavigate()
   useWorkspaces() // hydrates workspaceStore on mount
   const { data: notifData } = useNotifications()
   const unreadCount = notifData?.unread_count ?? 0
-
-  async function handleLogout() {
-    await logout()
-    navigate('/login', { replace: true })
-  }
 
   const projectLinks: NavItem[] = key
     ? [
@@ -150,53 +138,6 @@ export function Sidebar() {
           {darkMode ? 'Light mode' : 'Dark mode'}
         </button>
 
-        {/* User profile card */}
-        <div className="mt-1 border-t border-[var(--border)] pt-2">
-          <DropdownMenu>
-            <DropdownMenu.Trigger className="w-full">
-              <div className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors hover:bg-[var(--surface-hover)]">
-                <Avatar
-                  src={user?.avatar_url}
-                  name={user?.full_name || user?.email}
-                  size="sm"
-                  className="shrink-0 !h-6 !w-6"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-medium text-[var(--text-primary)]">
-                    {user?.full_name || 'My Account'}
-                  </p>
-                  <p className="truncate text-[10px] text-[var(--text-muted)]">
-                    {user?.email}
-                  </p>
-                </div>
-                <ChevronUp size={13} className="shrink-0 text-[var(--text-muted)]" />
-              </div>
-            </DropdownMenu.Trigger>
-
-            <DropdownMenu.Content align="left" className="bottom-full mb-1 w-56 !mt-0">
-              {/* User info header */}
-              <div className="flex items-center gap-2.5 px-3 py-2.5">
-                <Avatar
-                  src={user?.avatar_url}
-                  name={user?.full_name || user?.email}
-                  size="md"
-                  className="shrink-0"
-                />
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-[var(--text-primary)]">
-                    {user?.full_name || 'My Account'}
-                  </p>
-                  <p className="truncate text-xs text-[var(--text-muted)]">{user?.email}</p>
-                </div>
-              </div>
-              <DropdownMenu.Separator />
-              <DropdownMenu.Item destructive onClick={handleLogout}>
-                <LogOut size={14} />
-                Log out
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu>
-        </div>
       </div>
     </aside>
   )

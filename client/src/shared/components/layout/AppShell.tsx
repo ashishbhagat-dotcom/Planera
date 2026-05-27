@@ -1,5 +1,5 @@
 import { useNavigate, Outlet } from 'react-router-dom'
-import { PanelLeft, Settings, LogOut, ChevronDown } from 'lucide-react'
+import { PanelLeft, LogOut, ChevronDown } from 'lucide-react'
 import { Sidebar } from './Sidebar'
 import { BreadcrumbNav } from './BreadcrumbNav'
 import { CommandPalette } from './CommandPalette'
@@ -56,11 +56,6 @@ function UserProfileButton() {
             <p className="truncate text-xs text-[var(--text-muted)]">{user?.email}</p>
           </div>
         </div>
-        <DropdownMenu.Separator />
-        <DropdownMenu.Item onClick={() => navigate('/app/settings')}>
-          <Settings size={14} />
-          Settings
-        </DropdownMenu.Item>
         <DropdownMenu.Separator />
         <DropdownMenu.Item destructive onClick={handleLogout}>
           <LogOut size={14} />
