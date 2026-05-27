@@ -108,6 +108,14 @@ export const issueApi = {
     return res.data
   },
 
+  myIssues: async (filters: IssueFilters = {}): Promise<Issue[]> => {
+    const params = Object.fromEntries(
+      Object.entries(filters).filter(([, v]) => v !== undefined && v !== ''),
+    )
+    const res = await apiClient.get<PaginatedResponse<Issue>>('/me/issues/', { params })
+    return res.data.results
+  },
+
   search: async (q: string): Promise<Issue[]> => {
     const res = await apiClient.get<PaginatedResponse<Issue>>('/search/', { params: { q } })
     return res.data.results

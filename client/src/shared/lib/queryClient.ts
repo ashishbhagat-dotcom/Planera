@@ -30,6 +30,7 @@ export const queryKeys = {
   issues: {
     all: (projectKey: string, filters?: unknown) =>
       ['issues', projectKey, filters] as const,
+    mine: (filters?: unknown) => ['issues', 'mine', filters] as const,
     detail: (identifier: string) => ['issues', 'detail', identifier] as const,
     comments: (identifier: string) => ['issues', identifier, 'comments'] as const,
     activity: (identifier: string) => ['issues', identifier, 'activity'] as const,

@@ -8,6 +8,7 @@ import { ProjectList } from '@/modules/project/components/ProjectList'
 import { IssueListView } from '@/modules/issue/components/IssueListView'
 import { BoardView } from '@/modules/board/components/BoardView'
 import { DashboardPage } from '@/modules/dashboard/components/DashboardPage'
+import { MyIssuesPage } from '@/modules/issue/components/MyIssuesPage'
 import { SettingsPage } from '@/app/pages/SettingsPage'
 import type { ReactNode } from 'react'
 
@@ -52,7 +53,8 @@ export function AppRouter() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Navigate to="/app/dashboard" replace />} />
+            <Route index element={<Navigate to="/app/my-issues" replace />} />
+            <Route path="my-issues" element={<MyIssuesPage />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="projects" element={<ProjectList />} />
             <Route path="projects/:key/board" element={<BoardView />} />

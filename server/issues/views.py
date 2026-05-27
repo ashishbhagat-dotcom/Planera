@@ -1,11 +1,14 @@
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import mixins
+from rest_framework.filters import OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 from core.permissions import OrgScopedPermission
 from organizations.permissions import IsOrgAdminOrOwner, IsOrgMember
@@ -212,6 +215,27 @@ class LabelViewSet(
 
     def perform_create(self, serializer):
         serializer.save(organization=self.request.organization)
+
+
+class MyIssuesView(ListAPIView):
+    """All issues assigned to the current user across the entire workspace."""
+    permission_classes = (IsAuthenticated, OrgScopedPermission)
+    serializer_class = IssueListSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_class = IssueFilterSet
+    ordering_fields = ('status', 'priority', 'due_date', 'created_at')
+    ordering = ('-created_at',)
+
+    def get_queryset(self):
+        org = self.request.organization
+        if not org:
+            return Issue.objects.none()
+        return (
+            Issue.objects
+            .filter(assignee=self.request.user, project__organization=org)
+            .select_related('project', 'creator', 'assignee')
+            .prefetch_related('labels')
+        )
 
 
 class SearchView(APIView):

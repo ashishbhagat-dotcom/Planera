@@ -14,13 +14,15 @@ class LabelSerializer(serializers.ModelSerializer):
 class IssueListSerializer(serializers.ModelSerializer):
     assignee = UserSerializer(read_only=True)
     labels = LabelSerializer(many=True, read_only=True)
+    project_key = serializers.CharField(source='project.key', read_only=True)
+    project_name = serializers.CharField(source='project.name', read_only=True)
 
     class Meta:
         model = Issue
         fields = (
             'id', 'identifier', 'title', 'status', 'priority',
             'position', 'assignee', 'labels', 'due_date', 'estimate',
-            'created_at', 'updated_at',
+            'project_key', 'project_name', 'created_at', 'updated_at',
         )
         read_only_fields = fields
 

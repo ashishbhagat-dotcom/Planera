@@ -4,6 +4,7 @@ import {
   Layers,
   FolderKanban,
   ListTodo,
+  CircleUser,
   Settings,
   Bell,
   PanelLeft,
@@ -85,6 +86,11 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-2">
+        <SidebarNavLink
+          to="/app/my-issues"
+          icon={<CircleUser size={16} />}
+          label="My Issues"
+        />
         <SidebarNavLink
           to="/app/dashboard"
           icon={<LayoutDashboard size={16} />}

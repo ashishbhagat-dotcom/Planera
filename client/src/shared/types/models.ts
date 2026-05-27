@@ -56,6 +56,8 @@ export interface Issue {
   due_date: string | null
   estimate: number | null
   project: string
+  project_key?: string
+  project_name?: string
   created_at: string
   updated_at: string
 }

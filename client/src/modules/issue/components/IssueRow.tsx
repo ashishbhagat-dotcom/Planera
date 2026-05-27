@@ -41,9 +41,10 @@ function AssigneeAvatar({ name, avatarUrl }: { name: string; avatarUrl?: string 
 interface Props {
   issue: Issue
   onClick?: () => void
+  showProject?: boolean
 }
 
-export function IssueRow({ issue, onClick }: Props) {
+export function IssueRow({ issue, onClick, showProject = false }: Props) {
   const setActiveIssueId = useUiStore((s) => s.setActiveIssueId)
   return (
     <button
@@ -69,9 +70,14 @@ export function IssueRow({ issue, onClick }: Props) {
         {issue.identifier}
       </span>
 
-      {/* Title */}
-      <span className="truncate text-sm text-[var(--text-primary)]">
-        {issue.title}
+      {/* Title (with optional project badge) */}
+      <span className="flex min-w-0 items-center gap-1.5">
+        {showProject && issue.project_key && (
+          <span className="shrink-0 rounded bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[10px] font-medium text-[var(--text-muted)]">
+            {issue.project_key}
+          </span>
+        )}
+        <span className="truncate text-sm text-[var(--text-primary)]">{issue.title}</span>
       </span>
 
       {/* Labels */}

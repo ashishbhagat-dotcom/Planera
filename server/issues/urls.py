@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import CommentViewSet, IssueViewSet, LabelViewSet
+from .views import CommentViewSet, IssueViewSet, LabelViewSet, MyIssuesView
 
 router = DefaultRouter()
 router.register('labels', LabelViewSet, basename='label')
@@ -39,6 +39,8 @@ urlpatterns = [
             ),
         ]),
     ),
+    # My issues (cross-project): /api/v1/me/issues/
+    path('me/issues/', MyIssuesView.as_view(), name='my-issues'),
     # Labels: /api/v1/labels/
     path('', include(router.urls)),
 ]
