@@ -42,6 +42,11 @@ export const queryKeys = {
     stats: (workspaceSlug: string, projectKey?: string) =>
       ['dashboard', workspaceSlug, projectKey] as const,
   },
+  cycles: {
+    all: (projectKey: string) => ['cycles', projectKey] as const,
+    active: (projectKey: string) => ['cycles', projectKey, 'active'] as const,
+    detail: (cycleId: string) => ['cycles', 'detail', cycleId] as const,
+  },
   search: {
     results: (q: string) => ['search', q] as const,
   },

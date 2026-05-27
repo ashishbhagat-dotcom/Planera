@@ -63,8 +63,16 @@ export class WebSocketManager {
   disconnect() {
     this.stopped = true
     if (this.retryTimer) clearTimeout(this.retryTimer)
-    this.socket?.close()
-    this.socket = null
+    if (this.socket) {
+      // If still connecting, wait for open then close to avoid browser warning
+      if (this.socket.readyState === WebSocket.CONNECTING) {
+        const s = this.socket
+        s.onopen = () => s.close()
+      } else {
+        this.socket.close()
+      }
+      this.socket = null
+    }
     this.handlers.clear()
   }
 }

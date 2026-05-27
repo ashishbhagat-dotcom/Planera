@@ -1,11 +1,20 @@
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from core.permissions import OrgScopedPermission
-from .models import Project
+from organizations.permissions import IsOrgMember
+from .models import Cycle, Project
 from .permissions import ProjectPermission
-from .serializers import ProjectCreateSerializer, ProjectDetailSerializer, ProjectListSerializer
+from .serializers import (
+    CycleCreateSerializer,
+    CycleDetailSerializer,
+    CycleSerializer,
+    ProjectCreateSerializer,
+    ProjectDetailSerializer,
+    ProjectListSerializer,
+)
 
 
 class ProjectViewSet(ModelViewSet):
@@ -52,3 +61,53 @@ class ProjectViewSet(ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         return Response(ProjectDetailSerializer(instance).data)
+
+
+class CycleViewSet(ModelViewSet):
+    permission_classes = (OrgScopedPermission, IsOrgMember)
+    pagination_class = None
+    http_method_names = ('get', 'post', 'patch', 'delete', 'head', 'options')
+
+    def _get_project(self):
+        org = self.request.organization
+        key = self.kwargs.get('project_key', '').upper()
+        return Project.objects.get(organization=org, key=key)
+
+    def get_queryset(self):
+        try:
+            project = self._get_project()
+        except Project.DoesNotExist:
+            return Cycle.objects.none()
+        return Cycle.objects.filter(project=project).prefetch_related('issues')
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return CycleCreateSerializer
+        if self.action == 'retrieve':
+            return CycleDetailSerializer
+        return CycleSerializer
+
+    def create(self, request, *args, **kwargs):
+        project = self._get_project()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        cycle = serializer.save(project=project)
+        return Response(CycleSerializer(cycle).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=['get'], url_path='active')
+    def active_cycle(self, request, **kwargs):
+        from datetime import date
+        today = date.today()
+        try:
+            project = self._get_project()
+        except Project.DoesNotExist:
+            return Response(None)
+        cycle = (
+            Cycle.objects
+            .filter(project=project, start_date__lte=today, end_date__gte=today)
+            .prefetch_related('issues')
+            .first()
+        )
+        if not cycle:
+            return Response(None)
+        return Response(CycleDetailSerializer(cycle).data)

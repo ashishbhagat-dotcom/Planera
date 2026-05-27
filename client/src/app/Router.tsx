@@ -9,6 +9,7 @@ import { IssueListView } from '@/modules/issue/components/IssueListView'
 import { BoardView } from '@/modules/board/components/BoardView'
 import { DashboardPage } from '@/modules/dashboard/components/DashboardPage'
 import { MyIssuesPage } from '@/modules/issue/components/MyIssuesPage'
+import { CycleList, CycleDetail } from '@/modules/cycle'
 import { SettingsPage } from '@/app/pages/SettingsPage'
 import type { ReactNode } from 'react'
 
@@ -59,6 +60,8 @@ export function AppRouter() {
             <Route path="projects" element={<ProjectList />} />
             <Route path="projects/:key/board" element={<BoardView />} />
             <Route path="projects/:key/issues" element={<IssueListView />} />
+            <Route path="projects/:key/cycles" element={<CycleList />} />
+            <Route path="projects/:key/cycles/:cycleId" element={<CycleDetail />} />
             <Route path="notifications" element={<PlaceholderPage name="Notifications" />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>

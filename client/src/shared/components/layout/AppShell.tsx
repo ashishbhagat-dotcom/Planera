@@ -8,6 +8,7 @@ import { NotificationPanel } from '@/modules/notifications/components/Notificati
 import { useUiStore } from '@/shared/stores/uiStore'
 import { useKeyboardShortcut } from '@/shared/hooks/useKeyboardShortcut'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
+import { useWorkspaces, useCurrentWorkspace } from '@/modules/workspace/hooks/useWorkspace'
 import { Avatar } from '@/shared/components/ui/Avatar'
 import { DropdownMenu } from '@/shared/components/ui/DropdownMenu'
 import { cn } from '@/shared/lib/utils'
@@ -70,6 +71,13 @@ export function AppShell() {
   const { sidebarOpen, setSidebarOpen, toggleCommandPalette } = useUiStore()
   useKeyboardShortcut('k', toggleCommandPalette, { meta: true })
 
+  // Ensure workspace is selected before rendering any workspace-scoped routes.
+  // useWorkspaces auto-selects the first workspace; persist middleware makes
+  // currentWorkspace available immediately on refresh if previously saved.
+  const { isLoading: workspacesLoading } = useWorkspaces()
+  const currentWorkspace = useCurrentWorkspace()
+  const workspaceReady = !!currentWorkspace || !workspacesLoading
+
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--background)]">
       {sidebarOpen && <Sidebar />}
@@ -98,7 +106,11 @@ export function AppShell() {
         </header>
 
         <main className="flex-1 overflow-auto">
-          <Outlet />
+          {workspaceReady ? <Outlet /> : (
+            <div className="flex h-full items-center justify-center">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--accent)]" />
+            </div>
+          )}
         </main>
       </div>
 

@@ -10,6 +10,8 @@ class IssueFilterSet(django_filters.FilterSet):
     label = django_filters.UUIDFilter(field_name='labels__id')
     search = django_filters.CharFilter(field_name='title', lookup_expr='icontains')
 
+    cycle = django_filters.UUIDFilter(field_name='cycle_id')
+
     class Meta:
         model = Issue
-        fields = ('status', 'priority', 'assignee_id', 'label', 'search')
+        fields = ('status', 'priority', 'assignee_id', 'label', 'search', 'cycle')

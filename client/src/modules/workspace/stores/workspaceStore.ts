@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import type { Workspace } from '@/shared/types/models'
 
 interface WorkspaceState {
@@ -7,8 +8,16 @@ interface WorkspaceState {
   clearWorkspace: () => void
 }
 
-export const useWorkspaceStore = create<WorkspaceState>((set) => ({
-  currentWorkspace: null,
-  setCurrentWorkspace: (workspace) => set({ currentWorkspace: workspace }),
-  clearWorkspace: () => set({ currentWorkspace: null }),
-}))
+export const useWorkspaceStore = create<WorkspaceState>()(
+  persist(
+    (set) => ({
+      currentWorkspace: null,
+      setCurrentWorkspace: (workspace) => set({ currentWorkspace: workspace }),
+      clearWorkspace: () => set({ currentWorkspace: null }),
+    }),
+    {
+      name: 'planera-workspace',
+      partialize: (state) => ({ currentWorkspace: state.currentWorkspace }),
+    },
+  ),
+)

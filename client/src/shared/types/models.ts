@@ -53,6 +53,7 @@ export interface Issue {
   creator: User
   assignee: User | null
   labels: Label[]
+  cycle_id: string | null
   due_date: string | null
   estimate: number | null
   project: string

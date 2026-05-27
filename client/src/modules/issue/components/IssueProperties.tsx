@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
-import { Check, User, Hash, X } from 'lucide-react'
+import { Check, User, Hash, Timer, X } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { IssueStatus, IssuePriority } from '@/shared/types/enums'
 import { STATUS_LABELS, PRIORITY_LABELS } from '@/shared/lib/constants'
@@ -10,6 +10,8 @@ import { useMembers } from '@/modules/workspace/hooks/useMembers'
 import { Avatar } from '@/shared/components/ui/Avatar'
 import { StatusBadge, STATUS_ICON } from './StatusBadge'
 import { PriorityBadge, PRIORITY_ICON } from './PriorityIcon'
+import { useCycles } from '@/modules/cycle/hooks/useCycles'
+import { useSetIssueCycle } from '@/modules/cycle/hooks/useCycleMutations'
 import type { Issue } from '@/shared/types/models'
 
 // ── Popover via portal (escapes the panel's transform stacking context) ──────
@@ -129,6 +131,8 @@ export function IssueProperties({ issue, projectKey }: Props) {
   const update = useUpdateIssue(projectKey, issue.identifier)
   const { data: members = [] } = useMembers()
   const { data: labels = [] } = useLabels()
+  const { data: cycles = [] } = useCycles(projectKey)
+  const setCycle = useSetIssueCycle(projectKey)
 
   function set(data: Parameters<typeof update.mutate>[0]) {
     update.mutate(data)
@@ -326,6 +330,48 @@ export function IssueProperties({ issue, projectKey }: Props) {
           />
         </div>
       </div>
+
+      {/* Cycle */}
+      <EditableProperty
+        label="Cycle"
+        display={
+          issue.cycle_id ? (
+            <span className="flex items-center gap-1.5 text-xs">
+              <Timer size={12} className="text-green-500" />
+              <span className="truncate">
+                {cycles.find((c) => c.id === issue.cycle_id)?.name ?? 'Cycle'}
+              </span>
+            </span>
+          ) : (
+            <span className="flex items-center gap-1.5 text-[var(--text-muted)]">
+              <Timer size={12} />
+              No cycle
+            </span>
+          )
+        }
+      >
+        {(close) => (
+          <>
+            <DropdownItem
+              selected={!issue.cycle_id}
+              onClick={() => { setCycle.mutate({ identifier: issue.identifier, cycleId: null }); close() }}
+            >
+              <Timer size={12} className="text-[var(--text-muted)]" />
+              <span>No cycle</span>
+            </DropdownItem>
+            {cycles.map((c) => (
+              <DropdownItem
+                key={c.id}
+                selected={issue.cycle_id === c.id}
+                onClick={() => { setCycle.mutate({ identifier: issue.identifier, cycleId: c.id }); close() }}
+              >
+                <Timer size={12} className={c.status === 'active' ? 'text-green-500' : 'text-[var(--text-muted)]'} />
+                <span className="truncate">{c.name}</span>
+              </DropdownItem>
+            ))}
+          </>
+        )}
+      </EditableProperty>
     </div>
   )
 }

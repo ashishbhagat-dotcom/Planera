@@ -63,6 +63,13 @@ class Issue(BaseModel):
         related_name='assigned_issues',
     )
     labels = models.ManyToManyField(Label, blank=True, related_name='issues')
+    cycle = models.ForeignKey(
+        'projects.Cycle',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='issues',
+    )
     due_date = models.DateField(null=True, blank=True)
     estimate = models.PositiveSmallIntegerField(null=True, blank=True)  # story points
 

@@ -37,6 +37,11 @@ urlpatterns = [
                 IssueViewSet.as_view({'get': 'comments', 'post': 'comments'}),
                 name='issue-comments',
             ),
+            path(
+                '<str:identifier>/set-cycle/',
+                IssueViewSet.as_view({'post': 'set_cycle'}),
+                name='issue-set-cycle',
+            ),
         ]),
     ),
     # My issues (cross-project): /api/v1/me/issues/

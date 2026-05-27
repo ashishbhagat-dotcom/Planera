@@ -146,6 +146,21 @@ class IssueViewSet(ModelViewSet):
         )
         return Response(IssueDetailSerializer(updated).data)
 
+    @action(detail=True, methods=['post'], url_path='set-cycle')
+    def set_cycle(self, request, **kwargs):
+        issue = self.get_object()
+        from projects.models import Cycle
+        cycle_id = request.data.get('cycle_id')
+        if cycle_id is None:
+            issue.cycle = None
+        else:
+            try:
+                issue.cycle = Cycle.objects.get(pk=cycle_id, project=issue.project)
+            except Cycle.DoesNotExist:
+                return Response({'error': 'Cycle not found.'}, status=status.HTTP_400_BAD_REQUEST)
+        issue.save(update_fields=['cycle', 'updated_at'])
+        return Response(IssueDetailSerializer(issue).data)
+
     @action(detail=True, methods=['get'], url_path='activity')
     def activity(self, request, **kwargs):
         issue = self.get_object()

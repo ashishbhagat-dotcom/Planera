@@ -22,7 +22,7 @@ class IssueListSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'identifier', 'title', 'status', 'priority',
             'position', 'assignee', 'labels', 'due_date', 'estimate',
-            'project_key', 'project_name', 'created_at', 'updated_at',
+            'cycle_id', 'project_key', 'project_name', 'created_at', 'updated_at',
         )
         read_only_fields = fields
 

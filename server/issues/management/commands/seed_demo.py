@@ -2,8 +2,10 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
+from datetime import date, timedelta
+
 from organizations.models import Membership, Organization
-from projects.models import Project
+from projects.models import Cycle, Project
 from issues.models import Comment, Issue, Label
 from issues.services import IssueService
 
@@ -173,6 +175,42 @@ class Command(BaseCommand):
 
         issue_count = sum(1 for i in created_issues if i is not None)
         self.stdout.write(f'  Issues created: {issue_count}')
+
+        # Cycles — 2 per project: one active, one upcoming
+        today = date.today()
+        cycle_count = 0
+        for project in [plt, mob]:
+            active_exists = Cycle.objects.filter(
+                project=project, start_date__lte=today, end_date__gte=today
+            ).exists()
+            if not active_exists:
+                active = Cycle.objects.create(
+                    project=project,
+                    name='Sprint 3',
+                    description='Active sprint — in progress.',
+                    start_date=today - timedelta(days=7),
+                    end_date=today + timedelta(days=7),
+                )
+                # assign ~60% of the project's done/in-progress issues
+                proj_issues = [i for i in created_issues if i and i.project_id == project.id]
+                for issue in proj_issues[:max(1, len(proj_issues) * 3 // 5)]:
+                    issue.cycle = active
+                    issue.save(update_fields=['cycle', 'updated_at'])
+                cycle_count += 1
+
+            upcoming_exists = Cycle.objects.filter(
+                project=project, start_date__gt=today
+            ).exists()
+            if not upcoming_exists:
+                Cycle.objects.create(
+                    project=project,
+                    name='Sprint 4',
+                    description='Upcoming sprint — planning phase.',
+                    start_date=today + timedelta(days=8),
+                    end_date=today + timedelta(days=22),
+                )
+                cycle_count += 1
+        self.stdout.write(f'  Cycles created: {cycle_count}')
 
         # Comments
         comment_count = 0

@@ -4,6 +4,7 @@ import {
   Layers,
   FolderKanban,
   ListTodo,
+  Timer,
   CircleUser,
   Settings,
   Bell,
@@ -16,6 +17,7 @@ import { useUiStore } from '@/shared/stores/uiStore'
 import { WorkspaceSwitcher } from '@/modules/workspace/components/WorkspaceSwitcher'
 import { useWorkspaces } from '@/modules/workspace/hooks/useWorkspace'
 import { useNotifications } from '@/modules/notifications/hooks/useNotifications'
+import { ActiveCycleWidget } from '@/modules/cycle'
 
 interface NavItem {
   label: string
@@ -65,6 +67,11 @@ export function Sidebar() {
           icon: <ListTodo size={16} />,
           to: `/app/projects/${key}/issues`,
         },
+        {
+          label: 'Cycles',
+          icon: <Timer size={16} />,
+          to: `/app/projects/${key}/cycles`,
+        },
       ]
     : []
 
@@ -110,6 +117,7 @@ export function Sidebar() {
             {projectLinks.map((item) => (
               <SidebarNavLink key={item.to} {...item} />
             ))}
+            <ActiveCycleWidget projectKey={key} />
           </div>
         )}
       </nav>

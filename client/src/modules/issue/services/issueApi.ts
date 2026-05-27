@@ -9,6 +9,7 @@ export interface IssueFilters {
   label?: string
   search?: string
   ordering?: string
+  cycle?: string
 }
 
 export interface CreateIssueData {
