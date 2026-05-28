@@ -24,6 +24,9 @@ import { BoardCardOverlay } from './BoardCard'
 import { BoardHeader } from './BoardHeader'
 import { BoardSkeleton } from './BoardSkeleton'
 import { EmptyState } from '@/shared/components/data/EmptyState'
+import { useKeyboardNavigation } from '@/shared/hooks/useKeyboardNavigation'
+import { useUiStore } from '@/shared/stores/uiStore'
+import { useSelectionStore } from '@/shared/stores/selectionStore'
 import type { BoardData } from '@/shared/lib/boardUtils'
 
 export function BoardView() {
@@ -31,6 +34,8 @@ export function BoardView() {
   const { apiFilters } = useBoardFilters()
   const qc = useQueryClient()
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const { activeIssueId, setActiveIssueId } = useUiStore()
+  const { toggle } = useSelectionStore()
   useBoardSocket(projectKey)
   useKeyboardShortcut('c', () => setShowCreateModal(true))
 
@@ -63,6 +68,19 @@ export function BoardView() {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
   )
+
+  const allBoardIds = STATUS_ORDER.flatMap((s) => (activeBoardData[s as IssueStatus] ?? []).map((i) => i.identifier))
+  const { focusedId } = useKeyboardNavigation({
+    ids: allBoardIds,
+    enabled: !activeIssueId && !showCreateModal,
+    onOpen: setActiveIssueId,
+    onToggleSelect: toggle,
+  })
+
+  useEffect(() => {
+    if (!focusedId) return
+    document.querySelector(`[data-issue-card="${focusedId}"]`)?.scrollIntoView({ block: 'nearest' })
+  }, [focusedId])
 
   if (isLoading) return <BoardSkeleton />
   if (isError) return (
@@ -114,6 +132,7 @@ export function BoardView() {
                   status={status as IssueStatus}
                   issues={activeBoardData[status as IssueStatus] ?? []}
                   projectKey={projectKey}
+                  focusedId={focusedId}
                 />
               ))}
             </div>

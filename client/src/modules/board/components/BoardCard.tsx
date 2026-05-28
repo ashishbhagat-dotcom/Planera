@@ -131,7 +131,7 @@ function CardContent({ issue, projectKey: _projectKey, onDelete, isSelected, onT
 }
 
 // Sortable card — used inside SortableContext columns
-export function BoardCard({ issue, projectKey }: { issue: Issue; projectKey: string }) {
+export function BoardCard({ issue, projectKey, focused = false }: { issue: Issue; projectKey: string; focused?: boolean }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: issue.id })
   const deleteIssue = useDeleteIssue(projectKey)
   const setActiveIssueId = useUiStore((s) => s.setActiveIssueId)
@@ -144,12 +144,16 @@ export function BoardCard({ issue, projectKey }: { issue: Issue; projectKey: str
       style={{ transform: CSS.Transform.toString(transform), transition }}
       {...attributes}
       {...listeners}
+      tabIndex={0}
+      data-issue-card={issue.identifier}
       className={cn(
         'group relative cursor-grab rounded-md border bg-[var(--surface)]',
         'p-3 text-sm transition-shadow hover:bg-[var(--surface-hover)] hover:shadow-sm',
         isSelected
           ? 'border-[var(--accent)] ring-1 ring-[var(--accent)]/40'
-          : 'border-[var(--border)] hover:border-[var(--accent)]/40',
+          : focused
+            ? 'border-[var(--accent)]/60 ring-2 ring-[var(--accent)]/30'
+            : 'border-[var(--border)] hover:border-[var(--accent)]/40',
         isDragging && 'opacity-30',
       )}
       onClick={() => setActiveIssueId(issue.identifier)}

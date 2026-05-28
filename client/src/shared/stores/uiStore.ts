@@ -17,6 +17,7 @@ interface UiState {
   commandPaletteOpen: boolean
   boardViewMode: BoardViewMode
   notificationPanelOpen: boolean
+  shortcutsModalOpen: boolean
   darkMode: boolean
   setSidebarOpen: (open: boolean) => void
   toggleSidebar: () => void
@@ -25,6 +26,8 @@ interface UiState {
   toggleCommandPalette: () => void
   setBoardViewMode: (mode: BoardViewMode) => void
   toggleNotificationPanel: () => void
+  setShortcutsModalOpen: (open: boolean) => void
+  toggleShortcutsModal: () => void
   toggleDarkMode: () => void
 }
 
@@ -34,6 +37,7 @@ export const useUiStore = create<UiState>((set) => ({
   commandPaletteOpen: false,
   boardViewMode: 'kanban',
   notificationPanelOpen: false,
+  shortcutsModalOpen: false,
   darkMode: initDarkMode(),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
@@ -42,6 +46,8 @@ export const useUiStore = create<UiState>((set) => ({
   toggleCommandPalette: () => set((s) => ({ commandPaletteOpen: !s.commandPaletteOpen })),
   setBoardViewMode: (mode) => set({ boardViewMode: mode }),
   toggleNotificationPanel: () => set((s) => ({ notificationPanelOpen: !s.notificationPanelOpen })),
+  setShortcutsModalOpen: (open) => set({ shortcutsModalOpen: open }),
+  toggleShortcutsModal: () => set((s) => ({ shortcutsModalOpen: !s.shortcutsModalOpen })),
   toggleDarkMode: () => set((s) => {
     const next = !s.darkMode
     document.documentElement.classList.toggle('dark', next)

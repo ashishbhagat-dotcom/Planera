@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { LayoutGrid, List, Plus, ListTodo, RefreshCw } from 'lucide-react'
 import { useIssues } from '../hooks/useIssues'
@@ -9,6 +9,8 @@ import { EmptyState } from '@/shared/components/data/EmptyState'
 import { RoleGuard } from '@/shared/components/ui/RoleGuard'
 import { useProject } from '@/modules/project/hooks/useProjects'
 import { useUiStore } from '@/shared/stores/uiStore'
+import { useSelectionStore } from '@/shared/stores/selectionStore'
+import { useKeyboardNavigation } from '@/shared/hooks/useKeyboardNavigation'
 import { cn } from '@/shared/lib/utils'
 import { IssueStatus, MemberRole } from '@/shared/types/enums'
 
@@ -21,7 +23,8 @@ const STATUS_OPTIONS = [
 export function IssueListView() {
   const { key = '' } = useParams<{ key: string }>()
   const navigate = useNavigate()
-  const { setBoardViewMode } = useUiStore()
+  const { setBoardViewMode, activeIssueId, setActiveIssueId } = useUiStore()
+  const { toggle } = useSelectionStore()
   const [showCreate, setShowCreate] = useState(false)
   const [statusFilter, setStatusFilter] = useState('')
 
@@ -29,6 +32,19 @@ export function IssueListView() {
   const { data: issues = [], isLoading, isError, refetch } = useIssues(key, {
     status: statusFilter || undefined,
   })
+
+  const issueIds = issues.map((i) => i.identifier)
+  const { focusedId } = useKeyboardNavigation({
+    ids: issueIds,
+    enabled: !activeIssueId,
+    onOpen: setActiveIssueId,
+    onToggleSelect: toggle,
+  })
+
+  useEffect(() => {
+    if (!focusedId) return
+    document.querySelector(`[data-issue-row="${focusedId}"]`)?.scrollIntoView({ block: 'nearest' })
+  }, [focusedId])
 
   return (
     <div className="flex h-full flex-col">
@@ -142,7 +158,8 @@ export function IssueListView() {
             <IssueRow
               key={issue.id}
               issue={issue}
-              allIds={issues.map((i) => i.identifier)}
+              focused={focusedId === issue.identifier}
+              allIds={issueIds}
             />
           ))
         )}

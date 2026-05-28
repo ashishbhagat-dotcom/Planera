@@ -44,9 +44,10 @@ interface Props {
   onClick?: () => void
   showProject?: boolean
   allIds?: string[]
+  focused?: boolean
 }
 
-export function IssueRow({ issue, onClick, showProject = false, allIds }: Props) {
+export function IssueRow({ issue, onClick, showProject = false, allIds, focused = false }: Props) {
   const setActiveIssueId = useUiStore((s) => s.setActiveIssueId)
   const { selectedIds, toggle, selectRange } = useSelectionStore()
   const isSelected = selectedIds.has(issue.identifier)
@@ -76,10 +77,13 @@ export function IssueRow({ issue, onClick, showProject = false, allIds }: Props)
   return (
     <button
       onClick={handleRowClick}
+      tabIndex={0}
+      data-issue-row={issue.identifier}
       className={cn(
         'group grid h-9 w-full items-center border-b border-[var(--border)] px-4',
         'text-left transition-colors hover:bg-[var(--surface-hover)]',
         isSelected && 'bg-[var(--accent)]/5',
+        focused && !isSelected && 'bg-[var(--surface-hover)] outline-none ring-1 ring-inset ring-[var(--accent)]/50',
       )}
       style={{ gridTemplateColumns: '16px 16px 80px 1fr 160px 120px 24px', gap: '12px' }}
     >

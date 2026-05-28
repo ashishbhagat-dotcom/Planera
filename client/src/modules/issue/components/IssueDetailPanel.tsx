@@ -55,6 +55,10 @@ function PanelSkeleton() {
   )
 }
 
+function openPropertyDropdown(property: string) {
+  document.querySelector<HTMLButtonElement>(`[data-property="${property}"]`)?.click()
+}
+
 function PanelBody({ issue, projectKey }: { issue: Issue; projectKey: string }) {
   const [tab, setTab] = useState<'comments' | 'activity'>('comments')
   const [showAddSubIssue, setShowAddSubIssue] = useState(false)
@@ -63,6 +67,11 @@ function PanelBody({ issue, projectKey }: { issue: Issue; projectKey: string }) 
   const { mutate: updateIssue } = useUpdateIssue(projectKey, issue.identifier)
   const { mutate: createSubIssue } = useCreateIssue(projectKey)
   const { mutate: aiSuggest, data: aiResult, isPending: aiPending, error: aiError, reset: aiReset } = useAISuggest()
+
+  useKeyboardShortcut('s', () => openPropertyDropdown('status'))
+  useKeyboardShortcut('p', () => openPropertyDropdown('priority'))
+  useKeyboardShortcut('a', () => openPropertyDropdown('assignee'))
+  useKeyboardShortcut('l', () => openPropertyDropdown('labels'))
 
   function handleAISelectAction(action: AIAction) {
     setActiveAction(action)

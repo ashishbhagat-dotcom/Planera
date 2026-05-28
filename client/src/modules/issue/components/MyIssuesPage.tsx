@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   CircleUser, ChevronDown, ChevronRight, RefreshCw,
   Circle, CircleDot, Timer, Eye, CheckCircle2, XCircle,
@@ -11,6 +11,9 @@ import { EmptyState } from '@/shared/components/data/EmptyState'
 import { cn } from '@/shared/lib/utils'
 import type { Issue } from '@/shared/types/models'
 import { IssueStatus, IssuePriority } from '@/shared/types/enums'
+import { useUiStore } from '@/shared/stores/uiStore'
+import { useSelectionStore } from '@/shared/stores/selectionStore'
+import { useKeyboardNavigation } from '@/shared/hooks/useKeyboardNavigation'
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -117,9 +120,11 @@ interface GroupSectionProps {
   icon: React.ReactNode
   items: Issue[]
   showProject: boolean
+  focusedId: string | null
+  allIds: string[]
 }
 
-function GroupSection({ groupKey, label, icon, items, showProject }: GroupSectionProps) {
+function GroupSection({ groupKey: _groupKey, label, icon, items, showProject, focusedId, allIds }: GroupSectionProps) {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
@@ -141,7 +146,13 @@ function GroupSection({ groupKey, label, icon, items, showProject }: GroupSectio
       </button>
 
       {!collapsed && items.map((issue) => (
-        <IssueRow key={issue.id} issue={issue} showProject={showProject} />
+        <IssueRow
+          key={issue.id}
+          issue={issue}
+          showProject={showProject}
+          focused={focusedId === issue.identifier}
+          allIds={allIds}
+        />
       ))}
     </div>
   )
@@ -152,9 +163,24 @@ function GroupSection({ groupKey, label, icon, items, showProject }: GroupSectio
 export function MyIssuesPage() {
   const [groupBy, setGroupBy] = useState<GroupBy>('status')
   const { data: issues = [], isLoading, isError, refetch } = useMyIssues()
+  const { activeIssueId, setActiveIssueId } = useUiStore()
+  const { toggle } = useSelectionStore()
 
   const groups = groupIssues(issues, groupBy)
   const showProject = groupBy !== 'project'
+
+  const allIds = issues.map((i) => i.identifier)
+  const { focusedId } = useKeyboardNavigation({
+    ids: allIds,
+    enabled: !activeIssueId,
+    onOpen: setActiveIssueId,
+    onToggleSelect: toggle,
+  })
+
+  useEffect(() => {
+    if (!focusedId) return
+    document.querySelector(`[data-issue-row="${focusedId}"]`)?.scrollIntoView({ block: 'nearest' })
+  }, [focusedId])
 
   return (
     <div className="flex h-full flex-col">
@@ -231,6 +257,8 @@ export function MyIssuesPage() {
               icon={group.icon}
               items={group.items}
               showProject={showProject}
+              focusedId={focusedId}
+              allIds={allIds}
             />
           ))
         )}

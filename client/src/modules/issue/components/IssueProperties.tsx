@@ -65,10 +65,12 @@ function EditableProperty({
   label,
   display,
   children,
+  dataProperty,
 }: {
   label: string
   display: React.ReactNode
   children: (close: () => void) => React.ReactNode
+  dataProperty?: string
 }) {
   const [anchor, setAnchor] = useState<DOMRect | null>(null)
   const btnRef = useRef<HTMLButtonElement>(null)
@@ -87,6 +89,7 @@ function EditableProperty({
       <button
         ref={btnRef}
         onClick={toggle}
+        data-property={dataProperty}
         className="flex w-full items-center gap-1.5 rounded px-1 py-1 text-sm text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-hover)]"
       >
         {display}
@@ -144,7 +147,7 @@ export function IssueProperties({ issue, projectKey }: Props) {
   return (
     <div className="divide-y divide-[var(--border)]">
       {/* Status */}
-      <EditableProperty label="Status" display={<StatusBadge status={issue.status as IssueStatus} />}>
+      <EditableProperty label="Status" display={<StatusBadge status={issue.status as IssueStatus} />} dataProperty="status">
         {(close) => (
           <>
             {Object.values(IssueStatus).map((s) => (
@@ -162,7 +165,7 @@ export function IssueProperties({ issue, projectKey }: Props) {
       </EditableProperty>
 
       {/* Priority */}
-      <EditableProperty label="Priority" display={<PriorityBadge priority={issue.priority as IssuePriority} />}>
+      <EditableProperty label="Priority" display={<PriorityBadge priority={issue.priority as IssuePriority} />} dataProperty="priority">
         {(close) => (
           <>
             {Object.values(IssuePriority).map((p) => (
@@ -182,6 +185,7 @@ export function IssueProperties({ issue, projectKey }: Props) {
       {/* Assignee */}
       <EditableProperty
         label="Assignee"
+        dataProperty="assignee"
         display={
           issue.assignee ? (
             <span className="flex items-center gap-1.5">
@@ -234,6 +238,7 @@ export function IssueProperties({ issue, projectKey }: Props) {
       {/* Labels */}
       <EditableProperty
         label="Labels"
+        dataProperty="labels"
         display={
           issue.labels?.length > 0 ? (
             <div className="flex flex-wrap gap-1">

@@ -19,9 +19,10 @@ interface Props {
   status: IssueStatus
   issues: Issue[]
   projectKey: string
+  focusedId?: string | null
 }
 
-export function BoardColumn({ status, issues, projectKey }: Props) {
+export function BoardColumn({ status, issues, projectKey, focusedId }: Props) {
   const { setNodeRef } = useDroppable({ id: status })
 
   return (
@@ -46,7 +47,7 @@ export function BoardColumn({ status, issues, projectKey }: Props) {
           className="flex min-h-[80px] flex-1 flex-col gap-2 overflow-y-auto rounded-md p-1 transition-colors data-[dragging-over]:bg-[var(--surface-hover)]/40"
         >
           {issues.map((issue) => (
-            <BoardCard key={issue.id} issue={issue} projectKey={projectKey} />
+            <BoardCard key={issue.id} issue={issue} projectKey={projectKey} focused={focusedId === issue.identifier} />
           ))}
         </div>
       </SortableContext>

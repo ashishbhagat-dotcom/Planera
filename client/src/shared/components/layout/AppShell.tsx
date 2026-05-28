@@ -4,6 +4,7 @@ import { PanelLeft, LogOut, ChevronDown } from 'lucide-react'
 import { Sidebar } from './Sidebar'
 import { BreadcrumbNav } from './BreadcrumbNav'
 import { CommandPalette } from './CommandPalette'
+import { ShortcutsModal } from './ShortcutsModal'
 import { IssueDetailPanel } from '@/modules/issue/components/IssueDetailPanel'
 import { NotificationPanel } from '@/modules/notifications/components/NotificationPanel'
 import { BulkActionBar } from '@/shared/components/ui/BulkActionBar'
@@ -71,11 +72,12 @@ function UserProfileButton() {
 }
 
 export function AppShell() {
-  const { sidebarOpen, setSidebarOpen, toggleCommandPalette } = useUiStore()
+  const { sidebarOpen, setSidebarOpen, toggleCommandPalette, toggleShortcutsModal, shortcutsModalOpen } = useUiStore()
   const { clear: clearSelection } = useSelectionStore()
   const location = useLocation()
 
   useKeyboardShortcut('k', toggleCommandPalette, { meta: true })
+  useKeyboardShortcut('?', toggleShortcutsModal)
 
   // Clear selection on route change
   useEffect(() => { clearSelection() }, [location.pathname, clearSelection])
@@ -127,6 +129,7 @@ export function AppShell() {
       <CommandPalette />
       <NotificationPanel />
       <BulkActionBar />
+      <ShortcutsModal />
     </div>
   )
 }
