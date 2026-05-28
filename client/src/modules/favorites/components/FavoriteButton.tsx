@@ -17,6 +17,7 @@ export function FavoriteButton({ targetType, targetId, className, size = 14 }: P
     <button
       onClick={(e) => { e.stopPropagation(); toggle(targetType, targetId) }}
       disabled={isPending}
+      data-favorited={favorited ? 'true' : 'false'}
       className={cn(
         'rounded p-1 transition-colors disabled:opacity-50',
         favorited

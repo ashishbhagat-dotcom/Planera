@@ -1,4 +1,4 @@
-import api from '@/shared/lib/api'
+import { apiClient as api } from '@/shared/lib/api'
 
 export interface Favorite {
   id: string

@@ -13,6 +13,7 @@ import { IssuePriority, MemberRole } from '@/shared/types/enums'
 import { useDeleteIssue } from '@/modules/issue/hooks/useIssueMutations'
 import { useUiStore } from '@/shared/stores/uiStore'
 import { useSelectionStore } from '@/shared/stores/selectionStore'
+import { FavoriteButton } from '@/modules/favorites'
 
 const PRIORITY_ICON: Record<IssuePriority, React.ReactNode> = {
   [IssuePriority.URGENT]: <AlertCircle size={12} className="text-red-500" />,
@@ -55,19 +56,27 @@ function CardContent({ issue, projectKey: _projectKey, onDelete, isSelected, onT
           <span className="font-mono text-[11px] text-[var(--text-muted)]">{issue.identifier}</span>
         </div>
 
-        <RoleGuard roles={[MemberRole.OWNER, MemberRole.ADMIN]}>
-          <DropdownMenu>
-            <DropdownMenu.Trigger className="cursor-pointer rounded p-0.5 opacity-0 transition-opacity hover:bg-[var(--surface-hover)] group-hover:opacity-100">
-              <MoreVertical size={13} className="text-[var(--text-muted)]" />
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Content align="right">
-              <DropdownMenu.Item destructive onClick={onDelete}>
-                <Trash2 size={13} />
-                Delete
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu>
-        </RoleGuard>
+        <div className="flex items-center">
+          <FavoriteButton
+            targetType="issue"
+            targetId={issue.id}
+            size={12}
+            className="opacity-0 transition-opacity group-hover:opacity-100 data-[favorited=true]:opacity-100"
+          />
+          <RoleGuard roles={[MemberRole.OWNER, MemberRole.ADMIN]}>
+            <DropdownMenu>
+              <DropdownMenu.Trigger className="cursor-pointer rounded p-0.5 opacity-0 transition-opacity hover:bg-[var(--surface-hover)] group-hover:opacity-100">
+                <MoreVertical size={13} className="text-[var(--text-muted)]" />
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content align="right">
+                <DropdownMenu.Item destructive onClick={onDelete}>
+                  <Trash2 size={13} />
+                  Delete
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu>
+          </RoleGuard>
+        </div>
       </div>
 
       {/* Title */}

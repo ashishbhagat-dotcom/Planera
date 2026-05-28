@@ -14,9 +14,12 @@ export function ProjectCard({ project }: Props) {
   const color = project.color || DEFAULT_COLOR
 
   return (
-    <button
+    <div
       onClick={() => navigate(`/app/projects/${project.key}/board`)}
-      className="group flex flex-col gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 text-left transition-all hover:border-[var(--accent)] hover:shadow-sm"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && navigate(`/app/projects/${project.key}/board`)}
+      className="group flex cursor-pointer flex-col gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 text-left transition-all hover:border-[var(--accent)] hover:shadow-sm"
     >
       {/* Icon + key badge + star */}
       <div className="flex items-start justify-between">
@@ -51,6 +54,6 @@ export function ProjectCard({ project }: Props) {
         <span>{project.issue_count} {project.issue_count === 1 ? 'issue' : 'issues'}</span>
         <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--accent)]" />
       </div>
-    </button>
+    </div>
   )
 }
