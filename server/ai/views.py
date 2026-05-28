@@ -23,8 +23,10 @@ class AISuggestView(APIView):
             result = AIService.run(action=action, context=context)
         except Exception as e:
             msg = str(e)
-            if '429' in msg or 'quota' in msg.lower() or 'rate' in msg.lower():
-                return Response({'error': 'Rate limit reached. Please wait a moment and try again.'}, status=429)
+            if '429' in msg or 'quota' in msg.lower() or 'exhausted' in msg.lower():
+                return Response({'error': 'AI quota exceeded. Please try again later.'}, status=429)
+            if '404' in msg or 'not found' in msg.lower():
+                return Response({'error': 'AI model unavailable.'}, status=503)
             return Response({'error': msg}, status=500)
 
         return Response({'result': result})

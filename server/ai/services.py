@@ -3,7 +3,7 @@ from google import genai
 from django.conf import settings
 from .prompts import IMPROVE_DESCRIPTION_PROMPT, GENERATE_SUBTASKS_PROMPT, ESTIMATE_EFFORT_PROMPT
 
-_GEMINI_MODEL = 'gemini-1.5-flash'
+_GEMINI_MODEL = 'gemini-2.0-flash'
 
 
 def _call_gemini(prompt: str) -> str:
