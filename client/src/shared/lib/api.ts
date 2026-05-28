@@ -40,7 +40,15 @@ apiClient.interceptors.request.use((config) => {
     config.headers['Authorization'] = `Bearer ${accessToken}`
   }
 
-  const slug = useWorkspaceStore.getState().currentWorkspace?.slug
+  // Prefer in-memory store; fall back to raw localStorage in case zustand
+  // persist hasn't hydrated yet on the very first render tick.
+  let slug = useWorkspaceStore.getState().currentWorkspace?.slug
+  if (!slug) {
+    try {
+      const raw = localStorage.getItem('planera-workspace')
+      slug = raw ? JSON.parse(raw)?.state?.currentWorkspace?.slug : undefined
+    } catch { /* ignore */ }
+  }
   if (slug) {
     config.headers['X-Organization-Slug'] = slug
   }

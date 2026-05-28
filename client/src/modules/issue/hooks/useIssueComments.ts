@@ -40,11 +40,13 @@ export function useAddComment(projectKey: string, identifier: string) {
       return { snapshot, tempId: optimistic.id }
     },
 
-    onError: (_err, _body, ctx) => {
+    onError: (err: unknown, _body, ctx) => {
       if (ctx?.snapshot !== undefined) {
         queryClient.setQueryData(queryKeys.issues.comments(identifier), ctx.snapshot)
       }
-      toast.error('Failed to post comment')
+      const status = (err as { status?: number })?.status
+      const msg = (err as { error?: { message?: string } })?.error?.message
+      toast.error(`Failed to post comment${status ? ` (${status})` : ''}${msg ? `: ${msg}` : ''}`)
     },
 
     onSuccess: (created, _body, ctx) => {
