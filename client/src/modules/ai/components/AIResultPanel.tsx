@@ -39,9 +39,12 @@ export function AIResultPanel({ action, result, isLoading, error, onApply, onDis
   if (isLoading) return <AILoadingState />
 
   if (error) {
+    const isRateLimit = error.message?.includes('429') || error.message?.toLowerCase().includes('rate limit')
     return (
       <div className="p-3 text-xs text-red-400">
-        AI unavailable — {error.message}
+        {isRateLimit
+          ? 'Rate limit reached — please wait a moment and try again.'
+          : `AI unavailable — ${error.message}`}
       </div>
     )
   }
