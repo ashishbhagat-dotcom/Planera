@@ -33,6 +33,7 @@ services:
       - EMAIL_HOST_USER=resend
       - EMAIL_HOST_PASSWORD=${RESEND_API_KEY}
       - DEFAULT_FROM_EMAIL=${RESEND_FROM_EMAIL:-onboarding@resend.dev}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
     depends_on:
       db:
         condition: service_healthy

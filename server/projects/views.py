@@ -106,6 +106,7 @@ class CycleViewSet(ModelViewSet):
             Cycle.objects
             .filter(project=project, start_date__lte=today, end_date__gte=today)
             .prefetch_related('issues')
+            .order_by('-start_date')
             .first()
         )
         if not cycle:

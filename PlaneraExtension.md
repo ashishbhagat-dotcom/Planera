@@ -71,7 +71,7 @@ These are small but compound the quality of every feature added after them.
 | E03 | Sub-Issues ✅ COMPLETED | High | Low-Med | 3h | nullable `parent_id` on Issue |
 | E04 | Bulk Actions | High | Medium | 3.5h | None |
 | E05 | Favorites | Medium | Low | 2h | New table |
-| E06 | AI Issue Assistant | High | Medium | 5h | None |
+| E06 | AI Issue Assistant ✅ COMPLETED | High | Medium | 5h | None |
 | E07 | Keyboard Navigation | Medium | Low | 2h | None |
 | E08 | Issue Relations | Medium | Medium | 3h | New table |
 | E09 | Custom Views (Saved Filters) | Medium | Medium | 3h | New table |

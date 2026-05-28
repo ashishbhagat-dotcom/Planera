@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'issues',
     'notifications',
     'analytics',
+    'ai',
 ]
 
 MIDDLEWARE = [
@@ -109,6 +110,9 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(hour=0, minute=5),  # daily at 00:05
     },
 }
+
+from decouple import config as decouple_config
+GEMINI_API_KEY = decouple_config('GEMINI_API_KEY', default='')
 
 from datetime import timedelta
 SIMPLE_JWT = {

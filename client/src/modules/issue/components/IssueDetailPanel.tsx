@@ -2,11 +2,14 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { X, MessageSquare, Activity, Trash2, Plus, Circle, CircleDot, Timer, Eye, CheckCircle2, XCircle } from 'lucide-react'
 import { FavoriteButton } from '@/modules/favorites'
+import { AIAssistButton, useAISuggest } from '@/modules/ai'
+import { AIResultPanel } from '@/modules/ai/components/AIResultPanel'
+import type { AIAction, AIResult } from '@/modules/ai'
 import { cn } from '@/shared/lib/utils'
 import { useUiStore } from '@/shared/stores/uiStore'
 import { useKeyboardShortcut } from '@/shared/hooks/useKeyboardShortcut'
 import { useIssue } from '../hooks/useIssues'
-import { useDeleteIssue } from '../hooks/useIssueMutations'
+import { useDeleteIssue, useUpdateIssue, useCreateIssue } from '../hooks/useIssueMutations'
 import { IssueProperties } from './IssueProperties'
 import { IssueComments } from './IssueComments'
 import { IssueActivity } from './IssueActivity'
@@ -55,15 +58,59 @@ function PanelSkeleton() {
 function PanelBody({ issue, projectKey }: { issue: Issue; projectKey: string }) {
   const [tab, setTab] = useState<'comments' | 'activity'>('comments')
   const [showAddSubIssue, setShowAddSubIssue] = useState(false)
+  const [activeAction, setActiveAction] = useState<AIAction | null>(null)
   const setActiveIssueId = useUiStore((s) => s.setActiveIssueId)
+  const { mutate: updateIssue } = useUpdateIssue(projectKey, issue.identifier)
+  const { mutate: createSubIssue } = useCreateIssue(projectKey)
+  const { mutate: aiSuggest, data: aiResult, isPending: aiPending, error: aiError, reset: aiReset } = useAISuggest()
+
+  function handleAISelectAction(action: AIAction) {
+    setActiveAction(action)
+    aiReset()
+    aiSuggest({ action, context: { title: issue.title, description: issue.description ?? undefined } })
+  }
+
+  function handleAIApply(result: AIResult) {
+    if (activeAction === 'improve_description' && typeof result === 'string') {
+      updateIssue({ description: result })
+    } else if (activeAction === 'generate_subtasks' && Array.isArray(result)) {
+      (result as string[]).forEach((title) => createSubIssue({ title, parent_id: issue.id }))
+    } else if (activeAction === 'estimate_effort' && typeof result === 'object' && !Array.isArray(result)) {
+      const r = result as { story_points: number; priority: string }
+      updateIssue({ estimate: r.story_points, priority: r.priority })
+    }
+    setActiveAction(null)
+    aiReset()
+  }
+
+  function handleAIDiscard() {
+    setActiveAction(null)
+    aiReset()
+  }
 
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* Main — title + description + tabs */}
       <div className="flex flex-1 flex-col overflow-y-auto p-6">
-        <span className="mb-2 font-mono text-xs text-[var(--text-muted)]">
-          {issue.identifier}
-        </span>
+        <div className="mb-2 flex items-center justify-between">
+          <span className="font-mono text-xs text-[var(--text-muted)]">
+            {issue.identifier}
+          </span>
+          <AIAssistButton onSelectAction={handleAISelectAction} isPending={aiPending} />
+        </div>
+
+        {(aiPending || aiResult || aiError) && activeAction && (
+          <div className="mb-4">
+            <AIResultPanel
+              action={activeAction}
+              result={aiResult ?? null}
+              isLoading={aiPending}
+              error={aiError}
+              onApply={handleAIApply}
+              onDiscard={handleAIDiscard}
+            />
+          </div>
+        )}
 
         {issue.parent && (
           <button

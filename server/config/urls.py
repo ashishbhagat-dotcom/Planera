@@ -28,4 +28,5 @@ urlpatterns = [
     path('api/v1/notifications/', include('notifications.urls')),
     path('api/v1/analytics/', include('analytics.urls')),
     path('api/v1/favorites/', include('users.favorites_urls')),
+    path('api/v1/ai/', include('ai.urls')),
 ]
