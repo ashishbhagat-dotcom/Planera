@@ -7,7 +7,8 @@ import { queryKeys } from '@/shared/lib/queryClient'
 import type { Issue } from '@/shared/types/models'
 import type { IssueStatus } from '@/shared/types/enums'
 
-const WS_BASE = import.meta.env.VITE_WS_URL ?? 'ws://localhost:8000'
+const WS_BASE = import.meta.env.VITE_WS_URL ??
+  `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`
 
 export function useBoardSocket(projectKey: string) {
   const qc = useQueryClient()

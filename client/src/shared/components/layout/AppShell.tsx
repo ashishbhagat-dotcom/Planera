@@ -85,9 +85,12 @@ export function AppShell() {
   // Ensure workspace is selected before rendering any workspace-scoped routes.
   // useWorkspaces auto-selects the first workspace; persist middleware makes
   // currentWorkspace available immediately on refresh if previously saved.
-  const { isLoading: workspacesLoading } = useWorkspaces()
+  const { isPending: workspacePending } = useWorkspaces()
   const currentWorkspace = useCurrentWorkspace()
-  const workspaceReady = !!currentWorkspace || !workspacesLoading
+  // isPending is true until the first fetch resolves — guards against sending
+  // API calls without X-Organization-Slug on fresh login (isLoading is false
+  // on the very first render before the query starts, so it can't be used here)
+  const workspaceReady = !!currentWorkspace || !workspacePending
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--background)]">
