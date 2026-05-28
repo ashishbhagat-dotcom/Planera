@@ -5,7 +5,8 @@ import { getAccessToken } from '@/shared/lib/api'
 import { useAuthStore } from '@/modules/auth/stores/authStore'
 import { queryKeys } from '@/shared/lib/queryClient'
 
-const WS_BASE = import.meta.env.VITE_WS_URL ?? 'ws://localhost:8000'
+const WS_BASE = import.meta.env.VITE_WS_URL ??
+  `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`
 
 export function useNotificationSocket() {
   const qc = useQueryClient()
