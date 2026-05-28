@@ -18,29 +18,44 @@ export function useAddComment(projectKey: string, identifier: string) {
   const user = useAuthStore((s) => s.user)
 
   return useMutation({
-    mutationFn: (body: string) => issueApi.addComment(projectKey, identifier, body),
+    mutationFn: async (body: string) => {
+      try {
+        return await issueApi.addComment(projectKey, identifier, body)
+      } catch (e) {
+        console.error('[comment] mutationFn threw:', e)
+        throw e
+      }
+    },
 
     onMutate: async (body: string) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.issues.comments(identifier) })
-      const snapshot = queryClient.getQueryData<Comment[]>(queryKeys.issues.comments(identifier))
+      console.log('[comment] onMutate start — projectKey:', projectKey, 'identifier:', identifier, 'user:', user)
+      try {
+        await queryClient.cancelQueries({ queryKey: queryKeys.issues.comments(identifier) })
+        const snapshot = queryClient.getQueryData<Comment[]>(queryKeys.issues.comments(identifier))
 
-      const optimistic: Comment = {
-        id: `temp-${crypto.randomUUID()}`,
-        author: user!,
-        body,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        const optimistic: Comment = {
+          id: `temp-${Date.now().toString()}`,
+          author: user ?? { id: '', email: '', full_name: 'You', avatar_url: '', created_at: '' },
+          body,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+
+        queryClient.setQueryData<Comment[]>(queryKeys.issues.comments(identifier), (prev) => [
+          ...(prev ?? []),
+          optimistic,
+        ])
+
+        console.log('[comment] onMutate done, optimistic id:', optimistic.id)
+        return { snapshot, tempId: optimistic.id }
+      } catch (e) {
+        console.error('[comment] onMutate threw:', e)
+        throw e
       }
-
-      queryClient.setQueryData<Comment[]>(queryKeys.issues.comments(identifier), (prev) => [
-        ...(prev ?? []),
-        optimistic,
-      ])
-
-      return { snapshot, tempId: optimistic.id }
     },
 
     onError: (err: unknown, _body, ctx) => {
+      console.error('[comment] onError:', err)
       if (ctx?.snapshot !== undefined) {
         queryClient.setQueryData(queryKeys.issues.comments(identifier), ctx.snapshot)
       }
