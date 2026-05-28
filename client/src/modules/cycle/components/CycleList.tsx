@@ -4,6 +4,8 @@ import { Plus, RefreshCw } from 'lucide-react'
 import { useCycles } from '../hooks/useCycles'
 import { CycleCard } from './CycleCard'
 import { CreateCycleModal } from './CreateCycleModal'
+import { RoleGuard } from '@/shared/components/ui/RoleGuard'
+import { MemberRole } from '@/shared/types/enums'
 
 export function CycleList() {
   const { key = '' } = useParams<{ key: string }>()
@@ -53,25 +55,29 @@ export function CycleList() {
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-3">
         <h1 className="text-sm font-semibold text-[var(--text-primary)]">Cycles</h1>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 rounded-lg bg-[var(--accent)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--accent-hover)]"
-        >
-          <Plus size={14} />
-          New cycle
-        </button>
+        <RoleGuard roles={[MemberRole.ADMIN, MemberRole.OWNER]}>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-1.5 rounded-lg bg-[var(--accent)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--accent-hover)]"
+          >
+            <Plus size={14} />
+            New cycle
+          </button>
+        </RoleGuard>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-8">
         {cycles.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 gap-3">
             <p className="text-sm text-[var(--text-muted)]">No cycles yet.</p>
-            <button
-              onClick={() => setShowCreate(true)}
-              className="text-sm text-[var(--accent)] hover:underline"
-            >
-              Create your first cycle
-            </button>
+            <RoleGuard roles={[MemberRole.ADMIN, MemberRole.OWNER]}>
+              <button
+                onClick={() => setShowCreate(true)}
+                className="text-sm text-[var(--accent)] hover:underline"
+              >
+                Create your first cycle
+              </button>
+            </RoleGuard>
           </div>
         ) : (
           <>

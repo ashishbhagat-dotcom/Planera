@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from core.permissions import OrgScopedPermission
-from organizations.permissions import IsOrgMember
+from organizations.permissions import IsOrgAdminOrOwner, IsOrgMember
 from .models import Cycle, Project
 from .permissions import ProjectPermission
 from .serializers import (
@@ -67,6 +67,11 @@ class CycleViewSet(ModelViewSet):
     permission_classes = (OrgScopedPermission, IsOrgMember)
     pagination_class = None
     http_method_names = ('get', 'post', 'patch', 'delete', 'head', 'options')
+
+    def get_permissions(self):
+        if self.request.method not in ('GET', 'HEAD', 'OPTIONS'):
+            return [OrgScopedPermission(), IsOrgAdminOrOwner()]
+        return super().get_permissions()
 
     def _get_project(self):
         org = self.request.organization
