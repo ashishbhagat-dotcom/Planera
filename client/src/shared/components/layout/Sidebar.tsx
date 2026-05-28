@@ -150,7 +150,7 @@ export function Sidebar() {
             {projectLinks.map((item) => (
               <SidebarNavLink key={item.to} {...item} />
             ))}
-            <ActiveCycleWidget projectKey={key} />
+            {key && <ActiveCycleWidget projectKey={key} />}
           </div>
         )}
       </nav>

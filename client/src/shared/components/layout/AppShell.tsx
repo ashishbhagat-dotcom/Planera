@@ -72,7 +72,7 @@ function UserProfileButton() {
 }
 
 export function AppShell() {
-  const { sidebarOpen, setSidebarOpen, toggleCommandPalette, toggleShortcutsModal, shortcutsModalOpen } = useUiStore()
+  const { sidebarOpen, setSidebarOpen, toggleCommandPalette, toggleShortcutsModal } = useUiStore()
   const { clear: clearSelection } = useSelectionStore()
   const location = useLocation()
 
