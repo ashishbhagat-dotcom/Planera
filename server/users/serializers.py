@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
-from .models import User, OTPRegistration
+from .models import User, OTPRegistration, Favorite
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -86,3 +86,31 @@ class VerifyOTPSerializer(serializers.Serializer):
         otp.is_used = True
         otp.save(update_fields=['is_used'])
         return user
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    target_name = serializers.SerializerMethodField()
+    target_identifier = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Favorite
+        fields = ('id', 'target_type', 'target_id', 'target_name', 'target_identifier', 'created_at')
+        read_only_fields = ('id', 'target_name', 'target_identifier', 'created_at')
+
+    def get_target_name(self, obj):
+        if obj.target_type == 'project':
+            from projects.models import Project
+            return Project.objects.filter(id=obj.target_id).values_list('name', flat=True).first()
+        if obj.target_type == 'issue':
+            from issues.models import Issue
+            return Issue.objects.filter(id=obj.target_id).values_list('title', flat=True).first()
+        return None
+
+    def get_target_identifier(self, obj):
+        if obj.target_type == 'project':
+            from projects.models import Project
+            return Project.objects.filter(id=obj.target_id).values_list('key', flat=True).first()
+        if obj.target_type == 'issue':
+            from issues.models import Issue
+            return Issue.objects.filter(id=obj.target_id).values_list('identifier', flat=True).first()
+        return None

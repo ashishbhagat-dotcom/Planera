@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { X, MessageSquare, Activity, Trash2, Plus, Circle, CircleDot, Timer, Eye, CheckCircle2, XCircle } from 'lucide-react'
+import { FavoriteButton } from '@/modules/favorites'
 import { cn } from '@/shared/lib/utils'
 import { useUiStore } from '@/shared/stores/uiStore'
 import { useKeyboardShortcut } from '@/shared/hooks/useKeyboardShortcut'
@@ -226,6 +227,9 @@ export function IssueDetailPanel() {
             {activeIssueId ?? ''}
           </span>
           <div className="flex items-center gap-1">
+            {issue && (
+              <FavoriteButton targetType="issue" targetId={issue.id} />
+            )}
             <RoleGuard roles={[MemberRole.OWNER, MemberRole.ADMIN]}>
               {confirmDelete ? (
                 <>

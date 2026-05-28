@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Layers, ArrowRight } from 'lucide-react'
 import type { Project } from '@/shared/types/models'
+import { FavoriteButton } from '@/modules/favorites'
 
 interface Props {
   project: Project
@@ -17,7 +18,7 @@ export function ProjectCard({ project }: Props) {
       onClick={() => navigate(`/app/projects/${project.key}/board`)}
       className="group flex flex-col gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 text-left transition-all hover:border-[var(--accent)] hover:shadow-sm"
     >
-      {/* Icon + key badge */}
+      {/* Icon + key badge + star */}
       <div className="flex items-start justify-between">
         <div
           className="flex size-10 items-center justify-center rounded-lg text-xl"
@@ -25,9 +26,12 @@ export function ProjectCard({ project }: Props) {
         >
           {project.icon || <Layers size={20} />}
         </div>
-        <span className="rounded bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-xs text-[var(--text-muted)]">
-          {project.key}
-        </span>
+        <div className="flex items-center gap-1">
+          <FavoriteButton targetType="project" targetId={project.id} />
+          <span className="rounded bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-xs text-[var(--text-muted)]">
+            {project.key}
+          </span>
+        </div>
       </div>
 
       {/* Name + description */}

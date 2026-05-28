@@ -50,4 +50,7 @@ export const queryKeys = {
   search: {
     results: (q: string) => ['search', q] as const,
   },
+  favorites: {
+    all: () => ['favorites'] as const,
+  },
 }

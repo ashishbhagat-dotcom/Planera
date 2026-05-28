@@ -1,4 +1,4 @@
-import { NavLink, useParams } from 'react-router-dom'
+import { NavLink, useNavigate, useParams } from 'react-router-dom'
 import {
   LayoutDashboard,
   Layers,
@@ -11,6 +11,7 @@ import {
   PanelLeft,
   Moon,
   Sun,
+  FileText,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { useUiStore } from '@/shared/stores/uiStore'
@@ -18,6 +19,7 @@ import { WorkspaceSwitcher } from '@/modules/workspace/components/WorkspaceSwitc
 import { useWorkspaces } from '@/modules/workspace/hooks/useWorkspace'
 import { useNotifications } from '@/modules/notifications/hooks/useNotifications'
 import { ActiveCycleWidget } from '@/modules/cycle'
+import { useFavorites } from '@/modules/favorites'
 
 interface NavItem {
   label: string
@@ -48,12 +50,15 @@ function SidebarNavLink({ to, icon, label, end }: NavItem) {
 
 export function Sidebar() {
   const { key } = useParams<{ key?: string }>()
+  const navigate = useNavigate()
   const toggleSidebar = useUiStore((s) => s.toggleSidebar)
   const toggleNotificationPanel = useUiStore((s) => s.toggleNotificationPanel)
+  const setActiveIssueId = useUiStore((s) => s.setActiveIssueId)
   const { darkMode, toggleDarkMode } = useUiStore()
   useWorkspaces() // hydrates workspaceStore on mount
   const { data: notifData } = useNotifications()
   const unreadCount = notifData?.unread_count ?? 0
+  const { data: favorites = [] } = useFavorites()
 
   const projectLinks: NavItem[] = key
     ? [
@@ -108,6 +113,34 @@ export function Sidebar() {
           icon={<Layers size={16} />}
           label="Projects"
         />
+
+        {favorites.length > 0 && (
+          <div className="mt-3">
+            <p className="px-2.5 pb-1 text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
+              Favorites
+            </p>
+            {favorites.map((fav) => (
+              <button
+                key={fav.id}
+                onClick={() => {
+                  if (fav.target_type === 'project' && fav.target_identifier) {
+                    navigate(`/app/projects/${fav.target_identifier}/board`)
+                  } else if (fav.target_type === 'issue' && fav.target_identifier) {
+                    setActiveIssueId(fav.target_identifier)
+                  }
+                }}
+                className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+              >
+                <span className="size-4 shrink-0 text-yellow-400">
+                  {fav.target_type === 'project'
+                    ? <FolderKanban size={14} />
+                    : <FileText size={14} />}
+                </span>
+                <span className="truncate">{fav.target_name ?? fav.target_identifier ?? '—'}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {projectLinks.length > 0 && (
           <div className="mt-3">

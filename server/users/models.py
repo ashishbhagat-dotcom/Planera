@@ -3,6 +3,7 @@ import random
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.utils import timezone
+from core.models import BaseModel
 
 
 class UserManager(BaseUserManager):
@@ -71,3 +72,17 @@ class OTPRegistration(models.Model):
 
     def is_valid(self):
         return not self.is_used and timezone.now() < self.expires_at
+
+
+class Favorite(BaseModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
+    organization = models.ForeignKey(
+        'organizations.Organization', on_delete=models.CASCADE, related_name='favorites'
+    )
+    target_type = models.CharField(max_length=20)  # 'project' | 'issue'
+    target_id = models.UUIDField()
+
+    class Meta:
+        db_table = 'users_favorite'
+        unique_together = ('user', 'target_type', 'target_id')
+        ordering = ['created_at']
