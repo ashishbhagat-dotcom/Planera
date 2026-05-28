@@ -150,3 +150,16 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ('id', 'author', 'body', 'created_at', 'updated_at')
         read_only_fields = ('id', 'author', 'created_at', 'updated_at')
+
+
+class BulkUpdateSerializer(serializers.Serializer):
+    identifiers = serializers.ListField(
+        child=serializers.CharField(), min_length=1, max_length=100
+    )
+    changes = serializers.DictField()
+
+
+class BulkMoveNextSprintSerializer(serializers.Serializer):
+    identifiers = serializers.ListField(
+        child=serializers.CharField(), min_length=1, max_length=100
+    )

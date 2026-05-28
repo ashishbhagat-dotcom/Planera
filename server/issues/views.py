@@ -16,6 +16,8 @@ from .filters import IssueFilterSet
 from .models import Comment, Issue, Label
 from .serializers import (
     ActivitySerializer,
+    BulkUpdateSerializer,
+    BulkMoveNextSprintSerializer,
     CommentSerializer,
     IssueCreateSerializer,
     IssueDetailSerializer,
@@ -117,6 +119,16 @@ class IssueViewSet(ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         issue = self.get_object()
+
+        # Members cannot change sprint assignment
+        if 'cycle_id' in request.data:
+            from organizations.permissions import IsOrgAdminOrOwner
+            if not IsOrgAdminOrOwner().has_permission(request, self):
+                return Response(
+                    {'error': {'code': 'forbidden', 'message': 'Only admins and owners can change sprint assignment.'}},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
         serializer = IssueUpdateSerializer(issue, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
@@ -252,6 +264,38 @@ class MyIssuesView(ListAPIView):
             .select_related('project', 'creator', 'assignee')
             .prefetch_related('labels')
         )
+
+
+class BulkUpdateView(APIView):
+    permission_classes = [IsAuthenticated, OrgScopedPermission, IsOrgMember]
+
+    def post(self, request):
+        serializer = BulkUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        updated = IssueService.bulk_update(
+            identifiers=serializer.validated_data['identifiers'],
+            changes=serializer.validated_data['changes'],
+            actor=request.user,
+            org=request.organization,
+        )
+        return Response(IssueListSerializer(updated, many=True).data)
+
+
+class BulkMoveNextSprintView(APIView):
+    permission_classes = [IsAuthenticated, OrgScopedPermission, IsOrgMember]
+
+    def post(self, request):
+        serializer = BulkMoveNextSprintSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        updated, skipped = IssueService.bulk_move_to_next_sprint(
+            identifiers=serializer.validated_data['identifiers'],
+            actor=request.user,
+            org=request.organization,
+        )
+        return Response({
+            'updated': IssueListSerializer(updated, many=True).data,
+            'skipped': skipped,
+        })
 
 
 class SearchView(APIView):

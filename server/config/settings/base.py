@@ -102,6 +102,14 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler',
 }
 
+from celery.schedules import crontab
+CELERY_BEAT_SCHEDULE = {
+    'auto-advance-sprints': {
+        'task': 'projects.tasks.auto_advance_sprints',
+        'schedule': crontab(hour=0, minute=5),  # daily at 00:05
+    },
+}
+
 from datetime import timedelta
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),

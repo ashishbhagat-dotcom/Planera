@@ -7,6 +7,7 @@ import type { Issue } from '@/shared/types/models'
 import { IssueStatus, IssuePriority } from '@/shared/types/enums'
 import { cn } from '@/shared/lib/utils'
 import { useUiStore } from '@/shared/stores/uiStore'
+import { useSelectionStore } from '@/shared/stores/selectionStore'
 
 // --- Status indicator ---
 const STATUS_ICON: Record<IssueStatus, React.ReactNode> = {
@@ -42,22 +43,59 @@ interface Props {
   issue: Issue
   onClick?: () => void
   showProject?: boolean
+  allIds?: string[]
 }
 
-export function IssueRow({ issue, onClick, showProject = false }: Props) {
+export function IssueRow({ issue, onClick, showProject = false, allIds }: Props) {
   const setActiveIssueId = useUiStore((s) => s.setActiveIssueId)
+  const { selectedIds, toggle, selectRange } = useSelectionStore()
+  const isSelected = selectedIds.has(issue.identifier)
+
+  function handleRowClick(e: React.MouseEvent) {
+    if (e.shiftKey && allIds) {
+      e.preventDefault()
+      const lastSelected = [...selectedIds].at(-1)
+      const from = lastSelected ? allIds.indexOf(lastSelected) : -1
+      const to = allIds.indexOf(issue.identifier)
+      if (from !== -1 && to !== -1) {
+        selectRange(allIds.slice(Math.min(from, to), Math.max(from, to) + 1))
+      } else {
+        toggle(issue.identifier)
+      }
+      return
+    }
+    setActiveIssueId(issue.identifier)
+    onClick?.()
+  }
+
+  function handleCheckboxClick(e: React.MouseEvent) {
+    e.stopPropagation()
+    toggle(issue.identifier)
+  }
+
   return (
     <button
-      onClick={() => { setActiveIssueId(issue.identifier); onClick?.() }}
+      onClick={handleRowClick}
       className={cn(
         'group grid h-9 w-full items-center border-b border-[var(--border)] px-4',
         'text-left transition-colors hover:bg-[var(--surface-hover)]',
+        isSelected && 'bg-[var(--accent)]/5',
       )}
       style={{ gridTemplateColumns: '16px 16px 80px 1fr 160px 120px 24px', gap: '12px' }}
     >
-      {/* Priority */}
-      <span className="flex items-center">
-        {PRIORITY_ICON[issue.priority as IssuePriority] ?? PRIORITY_ICON[IssuePriority.NONE]}
+      {/* Checkbox on hover/selected, priority icon otherwise */}
+      <span className="flex items-center" onClick={handleCheckboxClick}>
+        <span className={cn('flex items-center', isSelected ? 'block' : 'hidden group-hover:block')}>
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => {}}
+            className="size-3.5 cursor-pointer accent-[var(--accent)]"
+          />
+        </span>
+        <span className={cn('flex items-center', isSelected ? 'hidden' : 'block group-hover:hidden')}>
+          {PRIORITY_ICON[issue.priority as IssuePriority] ?? PRIORITY_ICON[IssuePriority.NONE]}
+        </span>
       </span>
 
       {/* Status */}

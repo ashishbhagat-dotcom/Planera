@@ -139,7 +139,11 @@ export function IssueListView() {
           />
         ) : (
           issues.map((issue) => (
-            <IssueRow key={issue.id} issue={issue} />
+            <IssueRow
+              key={issue.id}
+              issue={issue}
+              allIds={issues.map((i) => i.identifier)}
+            />
           ))
         )}
       </div>

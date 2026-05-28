@@ -97,6 +97,46 @@ export function useUpdateIssue(projectKey: string, identifier: string) {
   })
 }
 
+export function useBulkMoveNextSprint() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: (identifiers: string[]) => issueApi.bulkMoveNextSprint(identifiers),
+
+    onSuccess: ({ updated, skipped }) => {
+      if (updated.length > 0) {
+        toast.success(`${updated.length} issue${updated.length > 1 ? 's' : ''} moved to next sprint`)
+        qc.invalidateQueries({ queryKey: ['issues'] })
+      }
+      if (skipped.length > 0) {
+        toast.error(`${skipped.length} issue${skipped.length > 1 ? 's' : ''} skipped — no upcoming sprint found`)
+      }
+    },
+
+    onError: () => {
+      toast.error('Failed to move issues to next sprint')
+    },
+  })
+}
+
+export function useBulkUpdate() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ identifiers, changes }: { identifiers: string[]; changes: Record<string, unknown> }) =>
+      issueApi.bulkUpdate(identifiers, changes),
+
+    onSuccess: () => {
+      toast.success('Issues updated')
+      qc.invalidateQueries({ queryKey: ['issues'] })
+    },
+
+    onError: () => {
+      toast.error('Failed to update issues')
+    },
+  })
+}
+
 export function useDeleteIssue(projectKey: string) {
   const qc = useQueryClient()
 

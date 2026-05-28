@@ -12,6 +12,7 @@ import type { Issue } from '@/shared/types/models'
 import { IssuePriority, MemberRole } from '@/shared/types/enums'
 import { useDeleteIssue } from '@/modules/issue/hooks/useIssueMutations'
 import { useUiStore } from '@/shared/stores/uiStore'
+import { useSelectionStore } from '@/shared/stores/selectionStore'
 
 const PRIORITY_ICON: Record<IssuePriority, React.ReactNode> = {
   [IssuePriority.URGENT]: <AlertCircle size={12} className="text-red-500" />,
@@ -22,17 +23,35 @@ const PRIORITY_ICON: Record<IssuePriority, React.ReactNode> = {
 }
 
 // Shared visual content — no dnd hooks
-function CardContent({ issue, projectKey: _projectKey, onDelete }: {
+function CardContent({ issue, projectKey: _projectKey, onDelete, isSelected, onToggleSelect }: {
   issue: Issue
   projectKey: string
   onDelete: () => void
+  isSelected?: boolean
+  onToggleSelect?: (e: React.MouseEvent) => void
 }) {
   return (
     <>
-      {/* Top row: priority + identifier + menu */}
+      {/* Top row: checkbox/priority + identifier + menu */}
       <div className="mb-1.5 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          <span>{PRIORITY_ICON[issue.priority as IssuePriority] ?? PRIORITY_ICON[IssuePriority.NONE]}</span>
+          {/* Checkbox on hover/selected, priority icon otherwise */}
+          <span
+            className="flex size-3 items-center justify-center"
+            onClick={onToggleSelect}
+          >
+            <span className={cn(isSelected ? 'block' : 'hidden group-hover:block')}>
+              <input
+                type="checkbox"
+                checked={!!isSelected}
+                onChange={() => {}}
+                className="size-3 cursor-pointer accent-[var(--accent)]"
+              />
+            </span>
+            <span className={cn('flex items-center', isSelected ? 'hidden' : 'block group-hover:hidden')}>
+              {PRIORITY_ICON[issue.priority as IssuePriority] ?? PRIORITY_ICON[IssuePriority.NONE]}
+            </span>
+          </span>
           <span className="font-mono text-[11px] text-[var(--text-muted)]">{issue.identifier}</span>
         </div>
 
@@ -107,6 +126,8 @@ export function BoardCard({ issue, projectKey }: { issue: Issue; projectKey: str
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: issue.id })
   const deleteIssue = useDeleteIssue(projectKey)
   const setActiveIssueId = useUiStore((s) => s.setActiveIssueId)
+  const { selectedIds, toggle } = useSelectionStore()
+  const isSelected = selectedIds.has(issue.identifier)
 
   return (
     <div
@@ -115,8 +136,11 @@ export function BoardCard({ issue, projectKey }: { issue: Issue; projectKey: str
       {...attributes}
       {...listeners}
       className={cn(
-        'group relative cursor-grab rounded-md border border-[var(--border)] bg-[var(--surface)]',
-        'p-3 text-sm transition-shadow hover:border-[var(--accent)]/40 hover:bg-[var(--surface-hover)] hover:shadow-sm',
+        'group relative cursor-grab rounded-md border bg-[var(--surface)]',
+        'p-3 text-sm transition-shadow hover:bg-[var(--surface-hover)] hover:shadow-sm',
+        isSelected
+          ? 'border-[var(--accent)] ring-1 ring-[var(--accent)]/40'
+          : 'border-[var(--border)] hover:border-[var(--accent)]/40',
         isDragging && 'opacity-30',
       )}
       onClick={() => setActiveIssueId(issue.identifier)}
@@ -125,6 +149,8 @@ export function BoardCard({ issue, projectKey }: { issue: Issue; projectKey: str
         issue={issue}
         projectKey={projectKey}
         onDelete={() => deleteIssue.mutate(issue.identifier)}
+        isSelected={isSelected}
+        onToggleSelect={(e) => { e.stopPropagation(); toggle(issue.identifier) }}
       />
     </div>
   )

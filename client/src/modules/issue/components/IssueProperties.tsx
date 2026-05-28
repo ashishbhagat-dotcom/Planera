@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { Check, User, Hash, Timer, X } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
-import { IssueStatus, IssuePriority } from '@/shared/types/enums'
+import { IssueStatus, IssuePriority, MemberRole } from '@/shared/types/enums'
 import { STATUS_LABELS, PRIORITY_LABELS } from '@/shared/lib/constants'
 import { useUpdateIssue } from '../hooks/useIssueMutations'
 import { useLabels } from '../hooks/useIssues'
@@ -12,6 +12,7 @@ import { StatusBadge, STATUS_ICON } from './StatusBadge'
 import { PriorityBadge, PRIORITY_ICON } from './PriorityIcon'
 import { useCycles } from '@/modules/cycle/hooks/useCycles'
 import { useSetIssueCycle } from '@/modules/cycle/hooks/useCycleMutations'
+import { useMyRole } from '@/modules/workspace/hooks/useMyRole'
 import type { Issue } from '@/shared/types/models'
 
 // ── Popover via portal (escapes the panel's transform stacking context) ──────
@@ -133,6 +134,8 @@ export function IssueProperties({ issue, projectKey }: Props) {
   const { data: labels = [] } = useLabels()
   const { data: cycles = [] } = useCycles(projectKey)
   const setCycle = useSetIssueCycle(projectKey)
+  const myRole = useMyRole()
+  const canManageSprint = myRole !== MemberRole.MEMBER
 
   function set(data: Parameters<typeof update.mutate>[0]) {
     update.mutate(data)
@@ -331,47 +334,68 @@ export function IssueProperties({ issue, projectKey }: Props) {
         </div>
       </div>
 
-      {/* Cycle */}
-      <EditableProperty
-        label="Cycle"
-        display={
-          issue.cycle_id ? (
-            <span className="flex items-center gap-1.5 text-xs">
-              <Timer size={12} className="text-green-500" />
-              <span className="truncate">
-                {cycles.find((c) => c.id === issue.cycle_id)?.name ?? 'Cycle'}
+      {/* Cycle — editable only for admins/owners */}
+      {canManageSprint ? (
+        <EditableProperty
+          label="Sprint"
+          display={
+            issue.cycle_id ? (
+              <span className="flex items-center gap-1.5 text-xs">
+                <Timer size={12} className="text-green-500" />
+                <span className="truncate">
+                  {cycles.find((c) => c.id === issue.cycle_id)?.name ?? 'Sprint'}
+                </span>
               </span>
-            </span>
-          ) : (
-            <span className="flex items-center gap-1.5 text-[var(--text-muted)]">
-              <Timer size={12} />
-              No cycle
-            </span>
-          )
-        }
-      >
-        {(close) => (
-          <>
-            <DropdownItem
-              selected={!issue.cycle_id}
-              onClick={() => { setCycle.mutate({ identifier: issue.identifier, cycleId: null }); close() }}
-            >
-              <Timer size={12} className="text-[var(--text-muted)]" />
-              <span>No cycle</span>
-            </DropdownItem>
-            {cycles.map((c) => (
+            ) : (
+              <span className="flex items-center gap-1.5 text-[var(--text-muted)]">
+                <Timer size={12} />
+                No sprint
+              </span>
+            )
+          }
+        >
+          {(close) => (
+            <>
               <DropdownItem
-                key={c.id}
-                selected={issue.cycle_id === c.id}
-                onClick={() => { setCycle.mutate({ identifier: issue.identifier, cycleId: c.id }); close() }}
+                selected={!issue.cycle_id}
+                onClick={() => { setCycle.mutate({ identifier: issue.identifier, cycleId: null }); close() }}
               >
-                <Timer size={12} className={c.status === 'active' ? 'text-green-500' : 'text-[var(--text-muted)]'} />
-                <span className="truncate">{c.name}</span>
+                <Timer size={12} className="text-[var(--text-muted)]" />
+                <span>No sprint</span>
               </DropdownItem>
-            ))}
-          </>
-        )}
-      </EditableProperty>
+              {cycles.map((c) => (
+                <DropdownItem
+                  key={c.id}
+                  selected={issue.cycle_id === c.id}
+                  onClick={() => { setCycle.mutate({ identifier: issue.identifier, cycleId: c.id }); close() }}
+                >
+                  <Timer size={12} className={c.status === 'active' ? 'text-green-500' : 'text-[var(--text-muted)]'} />
+                  <span className="truncate">{c.name}</span>
+                </DropdownItem>
+              ))}
+            </>
+          )}
+        </EditableProperty>
+      ) : (
+        <div className="py-2.5">
+          <p className="mb-1 text-[11px] font-medium text-[var(--text-muted)]">Sprint</p>
+          <div className="flex items-center gap-1.5 px-1 py-1 text-sm text-[var(--text-primary)]">
+            {issue.cycle_id ? (
+              <>
+                <Timer size={12} className="text-green-500" />
+                <span className="truncate">
+                  {cycles.find((c) => c.id === issue.cycle_id)?.name ?? 'Sprint'}
+                </span>
+              </>
+            ) : (
+              <span className="flex items-center gap-1.5 text-[var(--text-muted)]">
+                <Timer size={12} />
+                No sprint
+              </span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

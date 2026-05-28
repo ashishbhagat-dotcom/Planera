@@ -58,6 +58,21 @@ services:
       - api
       - redis
 
+  celery-beat:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    command: celery -A config.celery beat -l info
+    volumes:
+      - ./server:/app
+    environment:
+      - DATABASE_URL=postgres://planera:planera@db:5432/planera
+      - REDIS_URL=redis://redis:6379/0
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+    depends_on:
+      - api
+      - redis
+
   db:
     image: postgres:15-alpine
     environment:

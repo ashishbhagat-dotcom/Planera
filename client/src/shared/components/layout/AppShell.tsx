@@ -1,11 +1,14 @@
-import { useNavigate, Outlet } from 'react-router-dom'
+import { useNavigate, Outlet, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { PanelLeft, LogOut, ChevronDown } from 'lucide-react'
 import { Sidebar } from './Sidebar'
 import { BreadcrumbNav } from './BreadcrumbNav'
 import { CommandPalette } from './CommandPalette'
 import { IssueDetailPanel } from '@/modules/issue/components/IssueDetailPanel'
 import { NotificationPanel } from '@/modules/notifications/components/NotificationPanel'
+import { BulkActionBar } from '@/shared/components/ui/BulkActionBar'
 import { useUiStore } from '@/shared/stores/uiStore'
+import { useSelectionStore } from '@/shared/stores/selectionStore'
 import { useKeyboardShortcut } from '@/shared/hooks/useKeyboardShortcut'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { useWorkspaces, useCurrentWorkspace } from '@/modules/workspace/hooks/useWorkspace'
@@ -69,7 +72,13 @@ function UserProfileButton() {
 
 export function AppShell() {
   const { sidebarOpen, setSidebarOpen, toggleCommandPalette } = useUiStore()
+  const { clear: clearSelection } = useSelectionStore()
+  const location = useLocation()
+
   useKeyboardShortcut('k', toggleCommandPalette, { meta: true })
+
+  // Clear selection on route change
+  useEffect(() => { clearSelection() }, [location.pathname, clearSelection])
 
   // Ensure workspace is selected before rendering any workspace-scoped routes.
   // useWorkspaces auto-selects the first workspace; persist middleware makes
@@ -117,6 +126,7 @@ export function AppShell() {
       <IssueDetailPanel />
       <CommandPalette />
       <NotificationPanel />
+      <BulkActionBar />
     </div>
   )
 }

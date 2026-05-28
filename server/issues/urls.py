@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import CommentViewSet, IssueViewSet, LabelViewSet, MyIssuesView
+from .views import BulkMoveNextSprintView, BulkUpdateView, CommentViewSet, IssueViewSet, LabelViewSet, MyIssuesView
 
 router = DefaultRouter()
 router.register('labels', LabelViewSet, basename='label')
@@ -44,6 +44,9 @@ urlpatterns = [
             ),
         ]),
     ),
+    # Bulk update: /api/v1/issues/bulk-update/
+    path('issues/bulk-update/', BulkUpdateView.as_view(), name='issues-bulk-update'),
+    path('issues/bulk-move-next-sprint/', BulkMoveNextSprintView.as_view(), name='issues-bulk-move-next-sprint'),
     # My issues (cross-project): /api/v1/me/issues/
     path('me/issues/', MyIssuesView.as_view(), name='my-issues'),
     # Labels: /api/v1/labels/

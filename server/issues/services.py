@@ -46,6 +46,20 @@ class IssueService:
         status = data.get('status', Issue.Status.BACKLOG)
         if 'position' not in data:
             data['position'] = IssueService._next_position(project, status)
+
+        # Auto-assign to the currently active sprint (dates-based) if not explicitly set
+        if 'cycle_id' not in data or data.get('cycle_id') is None:
+            from projects.models import Cycle
+            from django.utils import timezone
+            today = timezone.now().date()
+            active_cycle = Cycle.objects.filter(
+                project=project,
+                start_date__lte=today,
+                end_date__gte=today,
+            ).first()
+            if active_cycle:
+                data['cycle_id'] = active_cycle.id
+
         issue = Issue(
             project=project,
             creator=creator,
@@ -146,6 +160,79 @@ class IssueService:
 
     @staticmethod
     @transaction.atomic
+    def bulk_move_to_next_sprint(*, identifiers: list, actor, org) -> tuple[list, list]:
+        """
+        Assign issues to the next upcoming cycle per project.
+        Returns (updated_issues, skipped_identifiers).
+        Skipped when no upcoming cycle exists for that project.
+        """
+        from collections import defaultdict
+        from projects.models import Cycle
+
+        issues = list(
+            Issue.objects.filter(identifier__in=identifiers, project__organization=org)
+            .select_related('project')
+        )
+
+        by_project: dict = defaultdict(list)
+        for issue in issues:
+            by_project[issue.project_id].append(issue)
+
+        updated: list = []
+        skipped: list = []
+
+        for project_id, project_issues in by_project.items():
+            from django.utils import timezone as tz
+            today = tz.now().date()
+            active = Cycle.objects.filter(
+                project_id=project_id, start_date__lte=today, end_date__gte=today
+            ).first()
+            if active:
+                next_cycle = (
+                    Cycle.objects.filter(
+                        project_id=project_id,
+                        start_date__gt=active.end_date,
+                    )
+                    .order_by('start_date')
+                    .first()
+                )
+            else:
+                next_cycle = (
+                    Cycle.objects.filter(project_id=project_id, start_date__gt=today)
+                    .order_by('start_date')
+                    .first()
+                )
+
+            if not next_cycle:
+                skipped.extend(i.identifier for i in project_issues)
+                continue
+
+            for issue in project_issues:
+                old_cycle_id = str(issue.cycle_id) if issue.cycle_id else None
+                issue.cycle = next_cycle
+                issue._skip_activity = True
+                issue.save(update_fields=['cycle', 'updated_at'])
+                Activity.objects.create(
+                    issue=issue,
+                    actor=actor,
+                    verb=Activity.UPDATED,
+                    data={'field': 'cycle_id', 'from': old_cycle_id, 'to': str(next_cycle.id)},
+                )
+                updated.append(issue)
+
+        if updated:
+            project_keys = {i.project.key for i in updated}
+            _actor_id = str(actor.id)
+            for key in project_keys:
+                transaction.on_commit(lambda k=key: broadcast_board_update(
+                    k, 'issue.bulk_updated',
+                    {'actor_id': _actor_id, 'identifiers': identifiers},
+                ))
+
+        return updated, skipped
+
+    @staticmethod
+    @transaction.atomic
     def move_issue(*, issue: Issue, actor, new_status: str, new_position: str) -> Issue:
         old_status = issue.status
         issue.status = new_status
@@ -208,6 +295,49 @@ class IssueService:
                 {'issue_id': _issue_id, 'identifier': _identifier, 'actor': _actor_email},
             ))
         return issue
+
+    @staticmethod
+    @transaction.atomic
+    def bulk_update(*, identifiers: list, changes: dict, actor, org) -> list:
+        ALLOWED_FIELDS = {'status', 'priority', 'assignee_id', 'cycle_id'}
+        filtered = {k: v for k, v in changes.items() if k in ALLOWED_FIELDS}
+        if not filtered:
+            return []
+
+        issues = list(
+            Issue.objects.filter(
+                identifier__in=identifiers,
+                project__organization=org,
+            ).select_related('project')
+        )
+
+        label_ids = changes.get('label_ids')
+
+        for issue in issues:
+            for field, value in filtered.items():
+                old = getattr(issue, field, None)
+                if old != value:
+                    Activity.objects.create(
+                        issue=issue,
+                        actor=actor,
+                        verb=Activity.UPDATED,
+                        data={'field': field, 'from': str(old), 'to': str(value)},
+                    )
+                setattr(issue, field, value)
+            issue._skip_activity = True
+            issue.save(update_fields=list(filtered.keys()) + ['updated_at'])
+            if label_ids is not None:
+                issue.labels.set(label_ids)
+
+        project_keys = {issue.project.key for issue in issues}
+        _actor_id = str(actor.id)
+        for key in project_keys:
+            transaction.on_commit(lambda k=key: broadcast_board_update(
+                k, 'issue.bulk_updated',
+                {'actor_id': _actor_id, 'identifiers': identifiers},
+            ))
+
+        return issues
 
     @staticmethod
     @transaction.atomic

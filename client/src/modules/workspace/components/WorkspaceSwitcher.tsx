@@ -4,8 +4,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cn } from '@/shared/lib/utils'
 import { useWorkspaces, useCurrentWorkspace } from '../hooks/useWorkspace'
 import { useWorkspaceStore } from '../stores/workspaceStore'
+import { useMyRole } from '../hooks/useMyRole'
 import { workspaceApi } from '../services/workspaceApi'
 import { queryKeys } from '@/shared/lib/queryClient'
+import { MemberRole } from '@/shared/types/enums'
 import type { Workspace } from '@/shared/types/models'
 
 function WorkspaceAvatar({ workspace, size = 'md' }: { workspace: Workspace; size?: 'sm' | 'md' }) {
@@ -86,6 +88,8 @@ export function WorkspaceSwitcher() {
   const { data: workspaces = [], isLoading } = useWorkspaces()
   const current = useCurrentWorkspace()
   const setCurrentWorkspace = useWorkspaceStore((s) => s.setCurrentWorkspace)
+  const myRole = useMyRole()
+  const canCreateWorkspace = myRole !== MemberRole.MEMBER
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -163,14 +167,18 @@ export function WorkspaceSwitcher() {
                   {ws.id === current.id && <Check size={14} className="text-[var(--accent)]" />}
                 </button>
               ))}
-              <div className="my-1 border-t border-[var(--border)]" />
-              <button
-                onClick={() => setCreating(true)}
-                className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-              >
-                <Plus size={14} />
-                Create workspace
-              </button>
+              {canCreateWorkspace && (
+                <>
+                  <div className="my-1 border-t border-[var(--border)]" />
+                  <button
+                    onClick={() => setCreating(true)}
+                    className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+                  >
+                    <Plus size={14} />
+                    Create workspace
+                  </button>
+                </>
+              )}
             </>
           ) : (
             <CreateWorkspaceForm

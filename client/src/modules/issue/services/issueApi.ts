@@ -118,6 +118,19 @@ export const issueApi = {
     return res.data.results
   },
 
+  bulkUpdate: async (identifiers: string[], changes: Record<string, unknown>): Promise<Issue[]> => {
+    const res = await apiClient.post<Issue[]>('/issues/bulk-update/', { identifiers, changes })
+    return res.data
+  },
+
+  bulkMoveNextSprint: async (identifiers: string[]): Promise<{ updated: Issue[]; skipped: string[] }> => {
+    const res = await apiClient.post<{ updated: Issue[]; skipped: string[] }>(
+      '/issues/bulk-move-next-sprint/',
+      { identifiers },
+    )
+    return res.data
+  },
+
   search: async (q: string): Promise<Issue[]> => {
     const res = await apiClient.get<PaginatedResponse<Issue>>('/search/', { params: { q } })
     return res.data.results
