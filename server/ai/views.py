@@ -15,7 +15,7 @@ class AISuggestView(APIView):
         action = request.data.get('action')
         if action not in self.ALLOWED_ACTIONS:
             return Response({'error': 'Invalid action'}, status=400)
-        if not getattr(settings, 'GEMINI_API_KEY', ''):
+        if not getattr(settings, 'GROQ_API_KEY', ''):
             return Response({'error': 'AI not configured'}, status=503)
 
         context = request.data.get('context', {})

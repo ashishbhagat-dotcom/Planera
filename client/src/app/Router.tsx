@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { LandingPage } from '@/app/pages/LandingPage'
 import { LoginForm } from '@/modules/auth/components/LoginForm'
 import { RegisterForm } from '@/modules/auth/components/RegisterForm'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
@@ -66,8 +67,8 @@ export function AppRouter() {
             <Route path="settings" element={<SettingsPage />} />
           </Route>
 
-          {/* Root redirect */}
-          <Route path="/" element={<Navigate to="/app" replace />} />
+          {/* Landing page */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="*" element={<Navigate to="/app" replace />} />
         </Routes>
       </AuthProvider>

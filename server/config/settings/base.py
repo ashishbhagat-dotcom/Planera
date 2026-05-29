@@ -112,7 +112,7 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 from decouple import config as decouple_config
-GEMINI_API_KEY = decouple_config('GEMINI_API_KEY', default='')
+GROQ_API_KEY = decouple_config('GROQ_API_KEY', default='')
 
 from datetime import timedelta
 SIMPLE_JWT = {
