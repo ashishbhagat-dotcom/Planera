@@ -48,7 +48,7 @@ export function BulkActionBar() {
         </span>
 
         <select
-          className="rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none"
+          className="select-app rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none"
           defaultValue=""
           onChange={(e) => { if (e.target.value) { apply({ status: e.target.value }); e.target.value = '' } }}
         >
@@ -59,7 +59,7 @@ export function BulkActionBar() {
         </select>
 
         <select
-          className="rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none"
+          className="select-app rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none"
           defaultValue=""
           onChange={(e) => { if (e.target.value) { apply({ priority: e.target.value }); e.target.value = '' } }}
         >
@@ -70,7 +70,7 @@ export function BulkActionBar() {
         </select>
 
         <select
-          className="rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none"
+          className="select-app rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none"
           defaultValue=""
           onChange={(e) => {
             if (e.target.value) {

@@ -75,6 +75,10 @@ function inputCn(extra = '') {
   )
 }
 
+function selectCn(extra = '') {
+  return cn(inputCn(extra), 'select-app')
+}
+
 function SaveButton({ loading, saved }: { loading: boolean; saved: boolean }) {
   return (
     <button
@@ -319,7 +323,7 @@ function MembersSettings() {
               <select
                 value={inviteRole}
                 onChange={(e) => setInviteRole(e.target.value as MemberRole)}
-                className={inputCn('w-32')}
+                className={selectCn('w-32')}
               >
                 {isOwner && <option value={MemberRole.ADMIN}>Admin</option>}
                 <option value={MemberRole.MEMBER}>Member</option>
@@ -376,7 +380,7 @@ function MembersSettings() {
                       value={m.role}
                       disabled={roleMutation.isPending}
                       onChange={(e) => roleMutation.mutate({ id: m.id, role: e.target.value })}
-                      className="rounded-md border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs text-[var(--text-secondary)] outline-none focus:border-[var(--accent)]"
+                      className="select-app rounded-md border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs text-[var(--text-secondary)] outline-none focus:border-[var(--accent)]"
                     >
                       {isOwner && <option value={MemberRole.ADMIN}>Admin</option>}
                       <option value={MemberRole.MEMBER}>Member</option>

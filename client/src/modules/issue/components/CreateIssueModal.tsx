@@ -80,7 +80,7 @@ export function CreateIssueModal({ projectKey, defaultStatus = IssueStatus.BACKL
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                className="select-app w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
               >
                 {Object.values(IssueStatus).map((s) => (
                   <option key={s} value={s}>{s.replace('_', ' ')}</option>
@@ -92,7 +92,7 @@ export function CreateIssueModal({ projectKey, defaultStatus = IssueStatus.BACKL
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as IssuePriority)}
-                className="w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                className="select-app w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
               >
                 {Object.values(IssuePriority).map((p) => (
                   <option key={p} value={p}>{p}</option>
