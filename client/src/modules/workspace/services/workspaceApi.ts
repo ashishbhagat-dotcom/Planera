@@ -29,7 +29,7 @@ export const workspaceApi = {
   },
 
   inviteMember: async (slug: string, data: { email: string; role: string }): Promise<Membership> => {
-    const res = await apiClient.post<Membership>(`/workspaces/${slug}/invite/`, data)
+    const res = await apiClient.post<Membership>(`/workspaces/${slug}/members/invite/`, data)
     return res.data
   },
 
