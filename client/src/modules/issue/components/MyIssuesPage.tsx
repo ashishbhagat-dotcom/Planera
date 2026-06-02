@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import axios from 'axios'
 import {
   CircleUser, ChevronDown, ChevronRight, RefreshCw,
   Circle, CircleDot, Timer, Eye, CheckCircle2, XCircle,
@@ -161,7 +162,8 @@ function GroupSection({ groupKey: _groupKey, label, icon, items, showProject, fo
 
 export function MyIssuesPage() {
   const [groupBy, setGroupBy] = useState<GroupBy>('status')
-  const { data: issues = [], isLoading, isError, refetch } = useMyIssues()
+  const { data: issues = [], isLoading, isError, error, refetch } = useMyIssues()
+  const isPermissionError = isError && axios.isAxiosError(error) && error.response?.status === 403
   const { activeIssueId, setActiveIssueId } = useUiStore()
   const { toggle } = useSelectionStore()
 
@@ -227,7 +229,7 @@ export function MyIssuesPage() {
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
           <IssueListSkeleton />
-        ) : isError ? (
+        ) : isError && !isPermissionError ? (
           <EmptyState
             icon={<RefreshCw size={24} />}
             title="Failed to load your issues"
