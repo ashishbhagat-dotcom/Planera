@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Building2, Users, Check, Loader2, Trash2,
-  ShieldCheck, Shield, UserCircle, Crown,
+  ShieldCheck, Shield, UserCircle, Crown, Clock, X,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { cn } from '@/shared/lib/utils'
@@ -272,6 +272,7 @@ function MembersSettings() {
     onSuccess: () => {
       setInviteEmail('')
       invalidate()
+      qc.invalidateQueries({ queryKey: queryKeys.workspaces.pendingInvites(workspace?.slug ?? '') })
       toast.success('Invitation sent')
     },
     onError: (err: unknown) => {
@@ -421,7 +422,79 @@ function MembersSettings() {
           </ul>
         )}
       </SectionCard>
+
+      {/* Pending invites — admin/owner only */}
+      {canManage && <PendingInvitesSection workspace={workspace} />}
     </div>
+  )
+}
+
+// ─── Pending invites section ─────────────────────────────────────────────────
+
+function PendingInvitesSection({ workspace }: { workspace: ReturnType<typeof useCurrentWorkspace> }) {
+  const qc = useQueryClient()
+  const slug = workspace?.slug ?? ''
+
+  const { data: invites = [], isLoading } = useQuery({
+    queryKey: queryKeys.workspaces.pendingInvites(slug),
+    queryFn: () => workspaceApi.getPendingInvites(slug),
+    enabled: !!slug,
+  })
+
+  const cancelMutation = useMutation({
+    mutationFn: (id: string) => workspaceApi.cancelInvite(slug, id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.workspaces.pendingInvites(slug) })
+      toast.success('Invite cancelled')
+    },
+    onError: () => toast.error('Failed to cancel invite'),
+  })
+
+  if (!isLoading && invites.length === 0) return null
+
+  return (
+    <SectionCard
+      title={`Pending invites${invites.length ? ` (${invites.length})` : ''}`}
+      description="Invited users who haven't registered yet."
+    >
+      {isLoading ? (
+        <div className="space-y-3">
+          {[1, 2].map((i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div className="h-8 w-8 animate-pulse rounded-full bg-[var(--surface-hover)]" />
+              <div className="h-3 w-48 animate-pulse rounded bg-[var(--surface-hover)]" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <ul className="divide-y divide-[var(--border)]">
+          {invites.map((inv) => (
+            <li key={inv.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-dashed border-[var(--border)] bg-[var(--surface-hover)]">
+                <Clock size={14} className="text-[var(--text-muted)]" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-[var(--text-primary)]">{inv.email}</p>
+                <p className="truncate text-xs text-[var(--text-muted)]">
+                  Invited by {inv.invited_by} · {inv.role}
+                </p>
+              </div>
+              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-500">
+                Pending
+              </span>
+              <button
+                onClick={() => cancelMutation.mutate(inv.id)}
+                disabled={cancelMutation.isPending}
+                className="rounded p-1.5 text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-hover)] hover:text-red-500"
+                title="Cancel invite"
+              >
+                <X size={14} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </SectionCard>
   )
 }
 

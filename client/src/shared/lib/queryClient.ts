@@ -22,6 +22,7 @@ export const queryKeys = {
     all: () => ['workspaces'] as const,
     detail: (slug: string) => ['workspaces', slug] as const,
     members: (slug: string) => ['workspaces', slug, 'members'] as const,
+    pendingInvites: (slug: string) => ['workspaces', slug, 'pending-invites'] as const,
   },
   projects: {
     all: (workspaceSlug: string) => ['projects', workspaceSlug] as const,

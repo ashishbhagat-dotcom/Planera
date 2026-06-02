@@ -23,6 +23,14 @@ export interface Membership {
   created_at: string
 }
 
+export interface PendingInvite {
+  id: string
+  email: string
+  role: MemberRole
+  invited_by: string
+  created_at: string
+}
+
 export interface Project {
   id: string
   name: string

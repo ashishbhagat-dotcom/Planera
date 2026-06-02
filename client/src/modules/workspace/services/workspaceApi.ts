@@ -1,6 +1,6 @@
 import { apiClient } from '@/shared/lib/api'
 import type { PaginatedResponse } from '@/shared/types/api'
-import type { Membership, Workspace } from '@/shared/types/models'
+import type { Membership, PendingInvite, Workspace } from '@/shared/types/models'
 
 export const workspaceApi = {
   list: async (): Promise<Workspace[]> => {
@@ -40,5 +40,14 @@ export const workspaceApi = {
 
   removeMember: async (membershipId: string): Promise<void> => {
     await apiClient.delete(`/workspaces/memberships/${membershipId}/`)
+  },
+
+  getPendingInvites: async (slug: string): Promise<PendingInvite[]> => {
+    const res = await apiClient.get<PendingInvite[]>(`/workspaces/${slug}/pending-invites/`)
+    return res.data
+  },
+
+  cancelInvite: async (slug: string, inviteId: string): Promise<void> => {
+    await apiClient.delete(`/workspaces/${slug}/pending-invites/${inviteId}/`)
   },
 }

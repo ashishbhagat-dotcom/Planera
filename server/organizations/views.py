@@ -95,6 +95,36 @@ class WorkspaceViewSet(ModelViewSet):
             )
         return Response(MembershipSerializer(membership).data, status=status.HTTP_201_CREATED)
 
+    @action(detail=True, methods=['get'], url_path='pending-invites',
+            permission_classes=[IsAuthenticated, IsOrgAdminOrOwner])
+    def pending_invites(self, request, slug=None):
+        from .models import PendingInvite
+        org = self.get_object()
+        invites = PendingInvite.objects.filter(organization=org).select_related('invited_by').order_by('-created_at')
+        data = [
+            {
+                'id': str(i.id),
+                'email': i.email,
+                'role': i.role,
+                'invited_by': i.invited_by.full_name or i.invited_by.email,
+                'created_at': i.created_at.isoformat(),
+            }
+            for i in invites
+        ]
+        return Response(data)
+
+    @action(detail=True, methods=['delete'], url_path='pending-invites/(?P<invite_id>[^/.]+)',
+            permission_classes=[IsAuthenticated, IsOrgAdminOrOwner])
+    def cancel_invite(self, request, slug=None, invite_id=None):
+        from .models import PendingInvite
+        org = self.get_object()
+        try:
+            invite = PendingInvite.objects.get(id=invite_id, organization=org)
+            invite.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except PendingInvite.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
 
 class MembershipViewSet(ModelViewSet):
     serializer_class = MembershipSerializer
