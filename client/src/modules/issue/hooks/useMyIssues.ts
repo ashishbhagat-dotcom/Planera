@@ -6,7 +6,7 @@ import { useWorkspaceStore } from '@/modules/workspace/stores/workspaceStore'
 export function useMyIssues(filters: IssueFilters = {}) {
   const slug = useWorkspaceStore((s) => s.currentWorkspace?.slug)
   return useQuery({
-    queryKey: queryKeys.issues.mine(filters),
+    queryKey: queryKeys.issues.mine(slug ?? '', filters),
     queryFn: () => issueApi.myIssues(filters),
     enabled: !!slug,
   })
