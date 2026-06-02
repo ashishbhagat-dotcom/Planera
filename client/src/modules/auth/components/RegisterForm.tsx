@@ -1,10 +1,23 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { Eye, EyeOff, AlertCircle, Loader2, ArrowRight, Check, Mail, Kanban, Sparkles, Zap } from 'lucide-react'
+import axios from 'axios'
 import { sendOtp, verifyOtp } from '../services/authApi'
 import { useAuthStore } from '../stores/authStore'
 import { ApiError } from '@/shared/types/api'
 import { cn } from '@/shared/lib/utils'
+
+function extractErrorMessage(err: unknown, fallback: string): string {
+  if (err instanceof ApiError) return err.message
+  if (axios.isAxiosError(err)) {
+    const data = err.response?.data
+    if (data?.non_field_errors?.[0]) return data.non_field_errors[0]
+    if (data?.detail) return data.detail
+    const firstField = data && Object.values(data)[0]
+    if (Array.isArray(firstField) && firstField[0]) return firstField[0]
+  }
+  return fallback
+}
 
 const INPUT_CLS = cn(
   'w-full rounded-lg border border-white/10 bg-white/5',
@@ -109,7 +122,7 @@ export function RegisterForm() {
       setStep('otp')
       startResendCooldown()
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.')
+      setError(extractErrorMessage(err, 'Something went wrong. Please try again.'))
     } finally {
       setLoading(false)
     }
@@ -124,7 +137,7 @@ export function RegisterForm() {
       setAuth(user, access)
       navigate('/app', { replace: true })
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.')
+      setError(extractErrorMessage(err, 'Something went wrong. Please try again.'))
     } finally {
       setLoading(false)
     }
@@ -138,7 +151,7 @@ export function RegisterForm() {
       await sendOtp({ email, full_name: fullName, password })
       startResendCooldown()
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to resend OTP.')
+      setError(extractErrorMessage(err, 'Failed to resend. Please try again.'))
     } finally {
       setLoading(false)
     }

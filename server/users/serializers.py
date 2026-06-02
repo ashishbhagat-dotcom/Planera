@@ -70,9 +70,9 @@ class VerifyOTPSerializer(serializers.Serializer):
                 is_used=False,
             ).latest('created_at')
         except OTPRegistration.DoesNotExist:
-            raise serializers.ValidationError('Invalid or expired OTP.')
+            raise serializers.ValidationError('Incorrect code. Please check and try again.')
         if not otp.is_valid():
-            raise serializers.ValidationError('OTP has expired. Please request a new one.')
+            raise serializers.ValidationError('This code has expired. Click "Resend code" to get a new one.')
         attrs['otp'] = otp
         return attrs
 
