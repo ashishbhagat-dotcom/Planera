@@ -18,7 +18,7 @@ export function CycleCard({ cycle, projectKey }: Props) {
   return (
     <Link
       to={`/app/projects/${projectKey}/cycles/${cycle.id}`}
-      className="block rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 transition-colors hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)]"
+      className="block rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 transition-colors hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)]"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
@@ -34,7 +34,7 @@ export function CycleCard({ cycle, projectKey }: Props) {
           {cycle.status}
         </span>
       </div>
-      <div className="mt-3">
+      <div className="mt-4">
         <CycleProgressBar progress={cycle.progress} />
       </div>
     </Link>

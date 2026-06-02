@@ -39,10 +39,10 @@ export function CycleList() {
     if (!items.length) return null
     return (
       <div>
-        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
           {title}
         </h3>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((c) => (
             <CycleCard key={c.id} cycle={c} projectKey={key} />
           ))}
@@ -66,7 +66,7 @@ export function CycleList() {
         </RoleGuard>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-8">
+      <div className="flex-1 overflow-y-auto p-6 space-y-10">
         {cycles.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 gap-3">
             <p className="text-sm text-[var(--text-muted)]">No cycles yet.</p>
