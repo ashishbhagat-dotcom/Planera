@@ -130,6 +130,18 @@ class VerifyOTPView(APIView):
         serializer = VerifyOTPSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+
+        # Auto-join any workspaces the user was invited to before registering
+        from organizations.models import PendingInvite, Membership
+        pending = PendingInvite.objects.filter(email=user.email).select_related('organization')
+        for invite in pending:
+            Membership.objects.get_or_create(
+                organization=invite.organization,
+                user=user,
+                defaults={'role': invite.role},
+            )
+        pending.delete()
+
         tokens = get_tokens_for_user(user)
         response = Response(
             {'user': UserSerializer(user).data, 'access': tokens['access']},

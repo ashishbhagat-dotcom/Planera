@@ -61,10 +61,29 @@ class WorkspaceViewSet(ModelViewSet):
 
         user = User.objects.filter(email=email).first()
         if not user:
-            return Response(
-                {'error': {'code': 'not_found', 'message': 'No user with that email.'}},
-                status=status.HTTP_404_NOT_FOUND,
+            from .models import PendingInvite
+            from django.core.mail import send_mail
+            from django.conf import settings as django_settings
+            PendingInvite.objects.update_or_create(
+                email=email, organization=org,
+                defaults={'role': role, 'invited_by': request.user},
             )
+            frontend_url = getattr(django_settings, 'FRONTEND_URL', 'http://localhost:3000')
+            signup_url = f'{frontend_url}/register?email={email}'
+            send_mail(
+                subject=f"You're invited to join {org.name} on Planera",
+                message=(
+                    f'Hi,\n\n'
+                    f'{request.user.full_name or request.user.email} has invited you to join '
+                    f'"{org.name}" on Planera.\n\n'
+                    f'Create your free account to get started:\n{signup_url}\n\n'
+                    f'— The Planera Team'
+                ),
+                from_email=getattr(django_settings, 'DEFAULT_FROM_EMAIL', 'noreply@planera.dev'),
+                recipient_list=[email],
+                fail_silently=False,
+            )
+            return Response({'detail': 'Invitation email sent.'}, status=status.HTTP_200_OK)
         membership, created = Membership.objects.get_or_create(
             organization=org, user=user,
             defaults={'role': role},

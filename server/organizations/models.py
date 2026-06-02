@@ -46,3 +46,25 @@ class Membership(BaseModel):
 
     def __str__(self):
         return f'{self.user.email} @ {self.organization.slug} ({self.role})'
+
+
+class PendingInvite(BaseModel):
+    email = models.EmailField()
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        related_name='pending_invites',
+    )
+    role = models.CharField(max_length=20, choices=Membership.ROLE_CHOICES, default=Membership.MEMBER)
+    invited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sent_invites',
+    )
+
+    class Meta:
+        db_table = 'organizations_pendinginvite'
+        unique_together = ('email', 'organization')
+
+    def __str__(self):
+        return f'{self.email} → {self.organization.slug}'

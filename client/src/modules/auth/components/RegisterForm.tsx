@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { Eye, EyeOff, AlertCircle, Loader2, ArrowRight, Check, Mail, Kanban, Sparkles, Zap } from 'lucide-react'
 import { sendOtp, verifyOtp } from '../services/authApi'
 import { useAuthStore } from '../stores/authStore'
@@ -85,9 +85,10 @@ function SidePanel() {
 }
 
 export function RegisterForm() {
+  const [searchParams] = useSearchParams()
   const [step, setStep] = useState<'details' | 'otp'>('details')
   const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(searchParams.get('email') ?? '')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [otp, setOtp] = useState('')
