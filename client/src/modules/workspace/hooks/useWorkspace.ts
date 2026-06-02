@@ -5,19 +5,24 @@ import { workspaceApi } from '../services/workspaceApi'
 import { useWorkspaceStore } from '../stores/workspaceStore'
 
 export function useWorkspaces() {
-  const { currentWorkspace, setCurrentWorkspace } = useWorkspaceStore()
+  const { currentWorkspace, setCurrentWorkspace, clearWorkspace } = useWorkspaceStore()
 
   const query = useQuery({
     queryKey: queryKeys.workspaces.all(),
     queryFn: workspaceApi.list,
   })
 
-  // Auto-select first workspace on initial load
   useEffect(() => {
-    if (!currentWorkspace && query.data && query.data.length > 0) {
+    if (!query.data) return
+    const slugs = query.data.map((w) => w.slug)
+    if (currentWorkspace && !slugs.includes(currentWorkspace.slug)) {
+      // Persisted workspace is no longer valid for this user — clear it
+      clearWorkspace()
+    }
+    if (!currentWorkspace && query.data.length > 0) {
       setCurrentWorkspace(query.data[0])
     }
-  }, [query.data, currentWorkspace, setCurrentWorkspace])
+  }, [query.data, currentWorkspace, setCurrentWorkspace, clearWorkspace])
 
   return query
 }
