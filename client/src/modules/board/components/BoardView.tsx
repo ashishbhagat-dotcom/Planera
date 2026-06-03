@@ -114,7 +114,7 @@ export function BoardView() {
         <EmptyState
           icon={<Kanban size={24} />}
           title="No issues yet"
-          description="Use the + button at the bottom of any column to create your first issue."
+          description="Press C to create your first issue."
         />
       ) : (
         <ErrorBoundary>
