@@ -380,7 +380,7 @@ function MembersSettings() {
                       value={m.role}
                       disabled={roleMutation.isPending}
                       onChange={(e) => roleMutation.mutate({ id: m.id, role: e.target.value })}
-                      className="select-app rounded-md border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs text-[var(--text-secondary)] outline-none focus:border-[var(--accent)]"
+                      className="select-app min-w-[80px] rounded-md border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs text-[var(--text-secondary)] outline-none focus:border-[var(--accent)]"
                     >
                       {isOwner && <option value={MemberRole.ADMIN}>Admin</option>}
                       <option value={MemberRole.MEMBER}>Member</option>
