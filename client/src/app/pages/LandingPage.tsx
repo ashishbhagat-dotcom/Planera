@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, Zap, Kanban, Users, Sparkles, GitBranch, Bell, ChevronRight } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 
-const NAV_LINKS = ['Features', 'Pricing', 'Changelog', 'Docs']
+const NAV_LINKS: string[] = []
 
 const FEATURES = [
   {
@@ -282,11 +282,7 @@ export function LandingPage() {
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
           <Logo />
           <p className="text-xs text-white/25">© {new Date().getFullYear()} Planera. Built for teams that ship.</p>
-          <div className="flex gap-5">
-            {['Privacy', 'Terms', 'Contact'].map((l) => (
-              <a key={l} href="#" className="text-xs text-white/30 transition-colors hover:text-white/60">{l}</a>
-            ))}
-          </div>
+          <div />
         </div>
       </footer>
     </div>
