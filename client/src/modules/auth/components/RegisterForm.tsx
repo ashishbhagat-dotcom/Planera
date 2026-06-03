@@ -190,7 +190,6 @@ export function RegisterForm() {
           {step === 'details' ? (
             <>
               <h1 className="mb-1 text-2xl font-bold text-white">Create your account</h1>
-              <p className="mb-8 text-sm text-white/40">Free forever · No credit card required</p>
 
               {error && (
                 <div className="mb-6 flex items-start gap-2.5 rounded-lg border border-red-500/20 bg-red-500/10 px-3.5 py-3 text-sm text-red-400">

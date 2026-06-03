@@ -148,7 +148,6 @@ export function LandingPage() {
           )}
         </div>
 
-        <p className="mt-4 text-xs text-white/30">Free forever · No credit card required</p>
 
         {/* Mock UI preview */}
         <div className="relative mx-auto mt-16 max-w-4xl overflow-hidden rounded-2xl border border-white/8 bg-[#0d0d1a] shadow-2xl shadow-black/60">
@@ -273,7 +272,6 @@ export function LandingPage() {
           >
             Get started for free <ChevronRight size={15} />
           </Link>
-          <p className="relative mt-4 text-xs text-white/30">No credit card required · Free forever</p>
         </div>
       </section>
 
