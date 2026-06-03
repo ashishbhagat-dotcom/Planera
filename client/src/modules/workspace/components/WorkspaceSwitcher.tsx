@@ -9,6 +9,13 @@ import { workspaceApi } from '../services/workspaceApi'
 import { queryKeys } from '@/shared/lib/queryClient'
 import { MemberRole } from '@/shared/types/enums'
 import type { Workspace } from '@/shared/types/models'
+import { ApiError } from '@/shared/types/api'
+
+function extractWorkspaceError(err: unknown): string {
+  if (err instanceof ApiError) return err.message
+  if (err instanceof Error) return err.message
+  return 'Failed to create workspace'
+}
 
 function WorkspaceAvatar({ workspace, size = 'md' }: { workspace: Workspace; size?: 'sm' | 'md' }) {
   const sz = size === 'sm' ? 'size-5 text-xs' : 'size-7 text-sm'
@@ -66,7 +73,7 @@ function CreateWorkspaceForm({ onCreated }: { onCreated: (ws: Workspace) => void
       />
       {mutation.isError && (
         <p className="text-xs text-red-500">
-          {mutation.error instanceof Error ? mutation.error.message : 'Failed to create'}
+          {extractWorkspaceError(mutation.error)}
         </p>
       )}
       <button

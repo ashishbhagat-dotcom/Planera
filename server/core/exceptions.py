@@ -33,8 +33,16 @@ def _get_code(status_code):
 
 
 def _get_message(data):
-    if isinstance(data, dict) and 'detail' in data:
-        return str(data['detail'])
+    if isinstance(data, dict):
+        if 'detail' in data:
+            return str(data['detail'])
+        if 'non_field_errors' in data:
+            errs = data['non_field_errors']
+            if errs:
+                return str(errs[0])
+        for val in data.values():
+            if isinstance(val, list) and val:
+                return str(val[0])
     if isinstance(data, list) and data:
         return str(data[0])
     return 'An error occurred.'
