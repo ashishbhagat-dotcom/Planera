@@ -78,7 +78,7 @@ function SidePanel() {
           </span>
         </h2>
         <p className="mb-8 text-sm leading-relaxed text-white/45">
-          Free forever. No credit card. Set up your workspace in under 2 minutes and start shipping.
+          Set up your workspace in under 2 minutes and start shipping.
         </p>
         <div className="space-y-3">
           {PERKS.map((p) => (
